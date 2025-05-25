@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>{{ project_name }} | Welcome</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+  <header>
+    <h1>
+        {{ project_name }}
+
+    </h1>
+     </header>
+
+  <main>
+    <p id="greeting">Loading …</p>
+  </main>
+
+  <script>
+    fetch("/api/hello")
+      .then(r => r.json())
+      .then(d => document.getElementById("greeting").textContent = d.msg);
+  </script>
+
+</body> 
+</html>
+
+
