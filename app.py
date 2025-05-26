@@ -1,5 +1,8 @@
 from flask import Flask, render_template, request, jsonify
+from ai_routes import ai_routes
+
 app = Flask(__name__)
+app.register_blueprint(ai_routes)
 
 @app.route("/")
 def index():

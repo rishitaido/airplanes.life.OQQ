@@ -17,12 +17,42 @@
 
   <main>
     <p id="greeting">Loading …</p>
+
+    <section id="ai-chat">
+      <h2> Ask AI</h2>
+      <textarea id="prompt" rows = "4" placeholder="Type your question here..."></textarea><br>
+      <button onclick="ask()">Submit"</button>
+      <pre id="response" style="white-space: pre-wrap; background: #f4f4f4; padding: 10px;"></pre>
+    </section>
   </main>
 
   <script>
     fetch("/api/hello")
       .then(r => r.json())
       .then(d => document.getElementById("greeting").textContent = d.msg);
+    // Ask AI handler
+    async function ask() {
+      const prompt = document.getElementById("prompt").value;
+      const responseBox = document.getElementById("response");
+      responseBox.textContent = "";
+      
+      const res = await fetch("/api/ask", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt })
+      });
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let result = "";
+
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        result += decoder.decode(value);
+        responseBox.textContent = result;
+      }
+    }
   </script>
 
 </body> 
