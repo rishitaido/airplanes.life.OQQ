@@ -20,7 +20,7 @@ def get_cached_response(prompt):
 def save_response_to_cache(prompt, response):
     conn= sqlite3.connect("cache.db")
     c= conn.cursor() 
-    c.execute("INSERT OR REPLACE INTO prompt_cache (prompt, response) VALUES (?,?)"), (prompt, response)
+    c.execute("INSERT OR REPLACE INTO prompt_cache (prompt, response) VALUES (?,?)", (prompt, response))
     conn.commit()
     conn.close()
     

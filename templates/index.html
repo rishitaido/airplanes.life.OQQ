@@ -9,72 +9,144 @@
 
 <body>
   <header>
-    <h1>
-        {{ project_name }}
-
-    </h1>
-     </header>
+    <h1>{{ project_name }}</h1>
+  </header>
 
   <main>
     <p id="greeting">Loading …</p>
 
     <section id="ai-chat">
       <h2>AI Chat</h2>
-      <div id="chat-box" style="border: 1px solid #ccc; padding: 10px; height: 300px; overflow-y: auto; background: #fafafa;"></div>
-      <input type="text" id="chat-input" placeholder="Type your message..." style="width: 80%;">
+      <div
+        id="chat-box"
+        style="border: 1px solid #ccc; padding: 10px; height: 300px; overflow-y: auto; background: #fafafa;"
+      ></div>
+      <input
+        type="text"
+        id="chat-input"
+        placeholder="Type your message..."
+        style="width: 80%; margin-top: 0.5rem;"
+      >
       <button onclick="sendMessage()">Send</button>
     </section>
   </main>
 
   <script>
+    // Load greeting
     fetch("/api/hello")
       .then(r => r.json())
       .then(d => document.getElementById("greeting").textContent = d.msg);
-      
+
     // Ask AI handler
     async function sendMessage() {
       const input = document.getElementById("chat-input");
       const chatBox = document.getElementById("chat-box");
-      const userMsg= input.value.trim();
+      const userMsg = input.value.trim();
       if (!userMsg) return;
 
-      responseBox.textContent = "";
-
-      // Show User Message
+      // Show user message
       const userBubble = document.createElement("div");
-      userBubble.textContent = "You: " + userMsg; 
+      userBubble.textContent = "You: " + userMsg;
       chatBox.appendChild(userBubble);
       chatBox.scrollTop = chatBox.scrollHeight;
 
-      input.value = "";
-
-      //Show Loading Response
+      // Placeholder for AI response
       const botBubble = document.createElement("div");
-      botBubble.textContent= "AI"; 
+      botBubble.textContent = "AI is thinking...";
       chatBox.appendChild(botBubble);
 
-      
-      const res = await fetch("/api/ask", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt : userMsg })
-      });
+      input.value = "";
 
-      const reader = res.body.getReader();
-      const decoder = new TextDecoder();
-      let fullResponse = "";
+      try {
+        const res = await fetch("/api/ask", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ prompt: userMsg })
+        });
 
-      while (true) {
-        const { value, done } = await reader.read();
-        if (done) break;
-        fullResponse += decoder.decode(value);
-        botBubble.textContent = "AI: " + fullResponse;
-        chatBox.scrollTop = chatBox.scrollHeight;
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        let fullResponse = "";
+
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          fullResponse += decoder.decode(value);
+          botBubble.textContent = "AI: " + fullResponse;
+          chatBox.scrollTop = chatBox.scrollHeight;
+        }
+      } catch (err) {
+        botBubble.textContent = "[ERROR]: Could not reach the server.";
       }
     }
   </script>
 
-</body> 
+  <h2>3D Aircraft Viewer</h2>
+  <div id="three-canvas-container"></div>
+
+  <script type="module">
+    console.log("🚀 Three.js module loaded");
+
+    import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.module.js';
+    import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.152.2/examples/jsm/loaders/GLTFLoader.js';
+    import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.152.2/examples/jsm/controls/OrbitControls.js';
+
+    // Renderer setup
+    const container = document.getElementById("three-canvas-container");
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth * 0.95, window.innerHeight * 0.7);
+    container.appendChild(renderer.domElement);
+
+    // Scene & camera
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0xeeeeee);
+    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(0, 2, 20);
+
+    // Controls
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.target.set(0, 0, 0);
+
+    // Lighting
+    scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+    const dirLight = new THREE.DirectionalLight(0xffffff, 1);
+    dirLight.position.set(10, 10, 10);
+    scene.add(dirLight);
+
+    // Axes helper (optional)
+    scene.add(new THREE.AxesHelper(5));
+
+    // Load the model
+    const loader = new GLTFLoader();
+    loader.load(
+      '/static/assets/3d/aircraft_kit_1_0.glb',
+      (gltf) => {
+        console.log("✅ Model loaded:", gltf);
+        const model = gltf.scene;
+        model.scale.set(0.1, 0.1, 0.1);
+        model.position.set(0, 0, 0);
+        scene.add(model);
+        animate();
+      },
+      undefined,
+      (error) => console.error("❌ Error loading model:", error)
+    );
+
+    // Animation loop
+    function animate() {
+      requestAnimationFrame(animate);
+      controls.update();
+      renderer.render(scene, camera);
+    }
+
+    // Handle resize
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth * 0.95, window.innerHeight * 0.7);
+    });
+  </script>
+</body>
+
 </html>
-
-
