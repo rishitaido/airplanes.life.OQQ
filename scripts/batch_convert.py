@@ -2,9 +2,9 @@
 import os
 import subprocess
 
-RAW_DIR = "static/assets/raw"
-OUT_DIR = "static/assets/3d"
-CONVERT_SCRIPT = "scripts/convert.py"
+RAW_DIR = "/Users/rishi/OpenQQuantify/static/assets/raw"
+OUT_DIR = "/Users/rishi/OpenQQuantify/static/assets/3d"
+CONVERT_SCRIPT = "/Users/rishi/OpenQQuantify/scripts/covert.py"
 
 # Supported input formats
 VALID_EXTENSIONS = [".blend", ".obj", ".fbx"]

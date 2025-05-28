@@ -83,13 +83,24 @@
 
   <h2>3D Aircraft Viewer</h2>
   <div id="three-canvas-container"></div>
+  <script type="importmap">
+  {
+    "imports": 
+    {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.module.js",
+      "three/": "https://cdn.jsdelivr.net/npm/three@0.152.2/"
+    }
+
+  }
+</script>
 
   <script type="module">
-    console.log("🚀 Three.js module loaded");
 
     import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.module.js';
     import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.152.2/examples/jsm/loaders/GLTFLoader.js';
     import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.152.2/examples/jsm/controls/OrbitControls.js';
+
+    console.log("🚀 Three.js module loaded");
 
     // Renderer setup
     const container = document.getElementById("three-canvas-container");
@@ -113,14 +124,16 @@
     const dirLight = new THREE.DirectionalLight(0xffffff, 1);
     dirLight.position.set(10, 10, 10);
     scene.add(dirLight);
+    scene.add(new THREE.AxesHelper(10));
+
 
     // Axes helper (optional)
     scene.add(new THREE.AxesHelper(5));
 
-    // Load the model
+    // Load the model 
     const loader = new GLTFLoader();
     loader.load(
-      '/static/assets/3d/aircraft_kit_1_0.glb',
+      '/static/assets/3d/Airplane.glb', 
       (gltf) => {
         console.log("✅ Model loaded:", gltf);
         const model = gltf.scene;

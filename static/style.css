@@ -79,3 +79,8 @@ button:hover {
   border-radius: 6px;
   box-shadow: 0 0 10px rgba(0,0,0,0.05);
 }
+
+#three-canvas-container canvas {
+  outline: 2px dashed red !important;
+}
+
