@@ -1,0 +1,30 @@
+version: '3.8'
+services:
+  app:
+    build: .
+    ports:
+      - "5000:5000"
+    # ensure your app logs go to stdout so Loki/Promtail can pick them up
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - './prometheus.yml:/etc/prometheus/prometheus.yml:ro'
+    ports:
+      - "9090:9090"
+  grafana:
+    image: grafana/grafana:latest
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=secret
+    ports:
+      - "3000:3000"
+      
+  # (Optional) loki + promtail if you want log aggregation:
+  # loki:
+  #   image: grafana/loki:2.8.2
+  #   ports: ['3100:3100']
+  # promtail:
+  #   image: grafana/promtail:2.8.2
+  #   volumes:
+  #     - '/var/log:/var/log'
+  #     - '/etc/promtail:/etc/promtail'
+  #   command: -config.file=/etc/promtail/config.yml
