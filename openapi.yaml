@@ -1,0 +1,39 @@
+openapi: 3.0.0
+info:
+  title: My AI 3D Viewer API
+  version: 1.0.0
+paths:
+  /api/hello:
+    get:
+      summary: Returns a welcome message
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    example: Hello!
+  /api/ask:
+    post:
+      summary: Sends a prompt to the AI and streams the response
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                prompt:
+                  type: string
+                  example: What is water?
+      responses:
+        '200':
+          description: Streamed plain-text response
+          content:
+            text/plain:
+              schema:
+                type: string
