@@ -14,7 +14,9 @@
   {
     "imports": {
       "three":  "https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.module.js",
-      "three/": "https://cdn.jsdelivr.net/npm/three@0.152.2/"
+      "three/": "https://cdn.jsdelivr.net/npm/three@0.152.2/",
+      "meshopt_decoder": "https://cdn.jsdelivr.net/npm/three@0.152.2/examples/jsm/libs/meshopt_decoder.module.js",
+      "ktx2loader": "https://cdn.jsdelivr.net/npm/three@0.152.2/examples/jsm/loaders/KTX2Loader.js"
     }
   }
   </script>
@@ -34,9 +36,7 @@
       <div class="viewer-controls">
         <label for="model-select">Choose a model:</label>
         <select id="model-select">
-            <option value="aircraft_kit_1_0.glb">Aircraft Kit 1.0</option>
-            <option value="Airplane.glb">Airplane</option>
-            <option value="very_cute_airplane.glb">Very Cute Airplane</option>
+            
         </select>
 
         <a class="cta-secondary" href="{{ url_for('index') }}">← Back to Chat</a>

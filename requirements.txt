@@ -1,0 +1,4 @@
+requests>=2.32
+tqdm>=4.66
+trimesh>=4.4
+numpy>=1.26

@@ -1,0 +1,41 @@
+name: Harvest-3D-Airplanes
+
+on:
+  schedule: [{cron: '0 4 * * 0'}]   # every Sunday 04:00 UTC
+  workflow_dispatch:
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install deps
+        run: pip install -r requirements.txt
+
+      - name: Install trimesh system deps
+        run: sudo apt-get update && sudo apt-get install -y libgl1-mesa-glx
+
+      - name: Download gltfpack
+        run: |
+          wget -q https://github.com/zeux/meshoptimizer/releases/latest/download/gltfpack-linux-x64 \
+            -O tools/gltfpack
+          chmod +x tools/gltfpack
+
+      - name: Harvest
+        env:
+          POLY_PIZZA_KEY: ${{ secrets.POLY_PIZZA_KEY }}
+        run: python scripts/ingest_airplanes.py
+
+      - name: Commit & push if changed
+        run: |
+          git config user.name  bot
+          git config user.email bot@example.com
+          git add static/assets/3d models.json
+          git diff --cached --quiet || \
+            git commit -m "ci: weekly airplane refresh"
+          git push
