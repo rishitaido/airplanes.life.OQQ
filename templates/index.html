@@ -1,171 +1,55 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My AI 3D Viewer</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My AI 3-D Viewer – Chat</title>
 
+  <!-- Global styles -->
+  <link rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}" />
+</head>
 <body>
   <header>
-    <h1>My AI 3D Viewer</h1>
+    <h1>My&nbsp;AI&nbsp;3-D&nbsp;Viewer</h1>
   </header>
 
-  <main>
-    <p id="greeting">Loading …</p>
+  <main class="layout-narrow">
+    <p id="greeting" class="fade-in greeting-clear">Loading …</p>
 
-    <section id="ai-chat">
-      <h2>AI Chat</h2>
-      <div id="chat-container"></div>
-      <div id="input-area">
-        <input type="text" id="chat-input" placeholder="Type your message...">
-        <button id="send-button">Send</button>
+    <section id="ai-chat" aria-label="Chat with AI">
+      <h2 class="visually-hidden">AI Chat</h2>
+
+      <!-- ✅  the message list that chat.js appends to -->
+      <div id="chat-container" role="log" aria-live="polite"></div>
+
+      <!-- footer sticks to bottom of the card -->
+      <div class="chat-footer">
+        <form id="input-area" autocomplete="off">
+          <label for="chat-input" class="visually-hidden">Type your message</label>
+          <input type="text" id="chat-input"
+                 placeholder="Type your message…" required />
+          <button id="send-button" type="submit"
+                  aria-label="Send message">Send</button>
+        </form>
+
+        <a class="cta-secondary" href="{{ url_for('model') }}">
+          View 3-D Model <span aria-hidden="true">▶</span>
+        </a>
       </div>
-    </section>
-
-    <section id="model-viewer">
-      <h2>3D Aircraft Viewer</h2>
-      <div id="three-canvas-container"></div>
-      <label for="model-select">Choose a model:</label>
-      <select id="model-select">
-        <option value="aircraft_kit_1_0.glb">Aircraft Kit 1.0</option>
-        <option value="Airplane.glb">Airplane</option>
-        <option value="very_cute_airplane.glb">Very Cute Airplane</option>
-      </select>
     </section>
   </main>
 
+  <!-- greeting demo -->
   <script>
-    // Load greeting
-    fetch("/api/hello")
-      .then(response => response.json())
-      .then(data => document.getElementById("greeting").textContent = data.msg)
-      .catch(() => document.getElementById("greeting").textContent = "Hello!");
-
-    // Helper to append messages with role labels
-    function addMessage(role, text) {
-      const container = document.getElementById('chat-container');
-      const messageDiv = document.createElement('div');
-      messageDiv.classList.add('message', role);
-      messageDiv.textContent = role === 'ai' ? `AI: ${text}` : text;
-      container.appendChild(messageDiv);
-      container.scrollTop = container.scrollHeight;
-      return messageDiv;
-    }
-
-    // Send message to AI
-    async function sendMessage() {
-      const input = document.getElementById('chat-input');
-      const prompt = input.value.trim();
-      if (!prompt) return;
-
-      addMessage('user', prompt);
-      input.value = '';
-      const aiDiv = addMessage('ai', '');
-
-      try {
-        const res = await fetch('/api/ask', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ prompt })
-        });
-        if (!res.ok) {
-          const err = await res.text();
-          aiDiv.textContent = `AI: Error ${res.status} - ${err}`;
-          return;
-        }
-        const reader = res.body.getReader();
-        const decoder = new TextDecoder();
-        let done = false;
-        while (!done) {
-          const { value, done: readerDone } = await reader.read();
-          done = readerDone;
-          if (value) {
-            aiDiv.textContent += decoder.decode(value);
-            document.getElementById('chat-container').scrollTop = document.getElementById('chat-container').scrollHeight;
-          }
-        }
-      } catch (error) {
-        aiDiv.textContent = `AI: [ERROR] ${error.message}`;
-      }
-    }
-
-    document.getElementById('send-button').addEventListener('click', sendMessage);
-    document.getElementById('chat-input').addEventListener('keydown', e => {
-      if (e.key === 'Enter') sendMessage();
-    });
+    window.addEventListener('DOMContentLoaded', () =>
+      document.getElementById('greeting').textContent =
+        'Hello 👋 – ask me anything!');
   </script>
 
-  <script type="importmap">
-  {
-    "imports": {
-      "three": "https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.module.js",
-      "three/": "https://cdn.jsdelivr.net/npm/three@0.152.2/"
-    }
-  }
-  </script>
-
-  <script type="module">
-    import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.module.js';
-    import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.152.2/examples/jsm/loaders/GLTFLoader.js';
-    import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.152.2/examples/jsm/controls/OrbitControls.js';
-
-    const MODEL_BASE = '/static/assets/3d/';
-    const container = document.getElementById('three-canvas-container');
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(window.innerWidth * 0.95, window.innerHeight * 0.7);
-    container.appendChild(renderer.domElement);
-
-    const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0xeeeeee);
-
-    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.set(0, 2, 20);
-
-    const controls = new OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
-    controls.target.set(0, 0, 0);
-
-    scene.add(new THREE.AmbientLight(0xffffff, 0.6));
-    const dirLight = new THREE.DirectionalLight(0xffffff, 1);
-    dirLight.position.set(10, 10, 10);
-    scene.add(dirLight);
-    scene.add(new THREE.AxesHelper(10));
-
-    const loader = new GLTFLoader();
-    let currentModel = null;
-
-    function loadModel(filename) {
-      const url = MODEL_BASE + filename;
-      loader.load(url, gltf => {
-        if (currentModel) scene.remove(currentModel);
-        currentModel = gltf.scene;
-        currentModel.scale.set(0.1, 0.1, 0.1);
-        scene.add(currentModel);
-      }, undefined, err => console.error('Error loading model', err));
-    }
-
-    document.getElementById('model-select').addEventListener('change', () =>
-      loadModel(document.getElementById('model-select').value)
-    );
-    loadModel(document.getElementById('model-select').value);
-
-    function animate() {
-      requestAnimationFrame(animate);
-      controls.update();
-      renderer.render(scene, camera);
-    }
-    animate();
-
-    window.addEventListener('resize', () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth * 0.95, window.innerHeight * 0.7);
-    });
-  </script>
-
+  <!-- ✅ move chat.js to the very end so elements exist -->
+  <script type="module"
+          src="{{ url_for('static', filename='chat.js') }}"></script>
 </body>
 
 </html>

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My AI 3-D Viewer – Model</title>
+
+  <!-- Global styles -->
+  <link rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}" />
+
+  <!-- Import-map so ES-modules in webapp.js can resolve Three-JS paths -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three":  "https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.module.js",
+      "three/": "https://cdn.jsdelivr.net/npm/three@0.152.2/"
+    }
+  }
+  </script>
+</head>
+
+<body>
+  <header>
+    <h1>My&nbsp;AI&nbsp;3-D&nbsp;Viewer</h1>
+  </header>
+
+  <main class="layout-wide">
+    <section id="model-viewer" aria-label="3-D Model Viewer">
+      <h2 class="visually-hidden">3-D Model</h2>
+
+      <div id="three-canvas-container"></div>
+      <!-- replace the label/select/back-link block -->
+      <div class="viewer-controls">
+        <label for="model-select">Choose a model:</label>
+        <select id="model-select">
+            <option value="aircraft_kit_1_0.glb">Aircraft Kit 1.0</option>
+            <option value="Airplane.glb">Airplane</option>
+            <option value="very_cute_airplane.glb">Very Cute Airplane</option>
+        </select>
+
+        <a class="cta-secondary" href="{{ url_for('index') }}">← Back to Chat</a>
+        </div>
+
+    </section>
+  </main>
+
+  <!-- Main Three-JS / app logic -->
+  <script type="module"
+          src="{{ url_for('static', filename='viewer.js') }}"></script>
+</body>
+</html>
