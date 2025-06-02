@@ -51,10 +51,6 @@ def ask():
             }
         }
 
-        print("➡️ Sending to HF:", HF_URL)
-        print("   Full Input:", full_input)
-        print("   Headers:", HEADERS)
-
         try:
             response = requests.post(HF_URL, headers=HEADERS, json=payload)
             print("⬅️ HF status:", response.status_code)
