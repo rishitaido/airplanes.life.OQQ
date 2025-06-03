@@ -6,6 +6,7 @@ from prometheus_client import Counter, Histogram, generate_latest
 import time 
 
 app = Flask(__name__)
+app.register_blueprint(ai_routes)
 
 # 1) Define your metrics
 REQUEST_COUNT   = Counter('request_count', 'Total HTTP requests', ['method', 'endpoint'])
@@ -28,8 +29,6 @@ def metrics():
     return generate_latest(), 200, {'Content-Type': 'text/plain; charset=utf-8'}
 
 
-app.register_blueprint(ai_routes)
-
 SWAGGER_URL = '/docs'
 API_URL     = '/openapi.yaml'
 
@@ -47,7 +46,7 @@ def openapi_spec():
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    return render_template("index.html", page_title='My AI 3-D Viewer – Chat')
 
 @app.route("/api/hello", methods=["GET"])
 def hello():

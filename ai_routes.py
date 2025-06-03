@@ -16,6 +16,7 @@ HF_URL = f"https://api-inference.huggingface.co/models/{AI_MODEL}"
 HEADERS = {"Authorization": f"Bearer {HUGGINGFACE_API_KEY}"}
 
 ai_routes = Blueprint("ai_routes", __name__)
+
 init_cache_db()
 
 @ai_routes.route("/api/ask", methods=["POST"])
