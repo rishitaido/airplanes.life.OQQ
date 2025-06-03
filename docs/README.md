@@ -20,7 +20,7 @@ This project is an interactive web application that integrates AI chat with 3D m
 - **Backend**: Python 3.10+, Flask
 - **Frontend**: HTML, CSS, JavaScript
 - **3D Rendering**: [Three.js](https://threejs.org/)
-- **AI Integration**: Custom API or third-party LLM endpoints (OpenAI, Hugging Face, etc.)
+- **AI Integration**: Third-party LLM endpoints (Hugging Face)
 
 ---
 
