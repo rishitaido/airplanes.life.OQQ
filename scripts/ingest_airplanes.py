@@ -2,6 +2,8 @@
 """
 End-to-end harvest:
 $ python scripts/ingest_airplanes.py [--keyword jet] [--limit 50]
+
+python -m scripts.ingest_airplanes --limit 10 or # 
 """
 from __future__ import annotations
 import argparse, json, hashlib, shutil, subprocess
