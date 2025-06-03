@@ -50,7 +50,7 @@ main {
   gap:1rem;
   background:var(--bg-elevated);
   border:1px solid var(--border);
-  border-radius:var(--radius);
+  border-radius:0;
   padding:1.5rem;
   box-shadow:var(--shadow);
 }
@@ -61,7 +61,8 @@ main {
   padding:1rem;
   background:#191919;
   border:1px solid var(--border);
-  border-radius:var(--radius);
+  border-radius:0;
+  max-height: calc(100% - 2rem);
 }
 
 .message {
@@ -69,7 +70,7 @@ main {
   margin-bottom:0.75rem;
   padding:0.75rem 1rem;
   line-height:1.45;
-  border-radius:18px;
+  border-radius:0px;
 }
 
 .message.user {
@@ -123,13 +124,22 @@ main {
   /* grow to 70 vh but never below 500 px — keeps it tall on desktops */
   height: min(70vh, 900px);
   min-height: 500px;          /* was 400 */
-  background: #000;
+  background: transparent;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
   overflow: hidden;
   position: relative;
 }
+
+#three-canvas-container canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;               /* removes any inline‐block gaps */
+  background: transparent;
+
+}
+
 
 /* subtle inner border-glow for neatness */
 #three-canvas-container::after {

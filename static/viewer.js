@@ -11,8 +11,14 @@ const width  = wrap.clientWidth  || 800;
 const height = wrap.clientHeight || 600;
 
 /* ---------- THREE boilerplate ---------- */
-const renderer = new THREE.WebGLRenderer({ antialias: true });
+const renderer = new THREE.WebGLRenderer({ 
+  antialias: true,
+  alpha: true
+});
+
 renderer.setSize(width, height);
+renderer.setClearColor(0x000000, 0);
+
 wrap.appendChild(renderer.domElement);
 
 const scene  = new THREE.Scene();
