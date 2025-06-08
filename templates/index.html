@@ -3,53 +3,93 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>My AI 3-D Viewer – Chat</title>
+  <title>airplanes.life – AI Travel Concierge</title>
 
-  <!-- Global styles -->
-  <link rel="stylesheet"
-        href="{{ url_for('static', filename='style.css') }}" />
+  <!-- Styles -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
 </head>
+
 <body>
   <header>
-    <h1>My&nbsp;AI&nbsp;3-D&nbsp;Viewer</h1>
+    <h1>airplanes.life ✈️</h1>
+    <nav class="header-ctas">
+      <a class="cta-secondary" href="{{ url_for('model') }}">View 3-D Aircraft ▶</a>
+      <a class="cta-secondary" href="{{ url_for('itinerary') }}">View 3-D Itinerary Map</a>
+  </nav>
   </header>
 
   <main class="layout-narrow">
     <p id="greeting" class="fade-in greeting-clear">Loading …</p>
 
+    <!-- ✦ Intro Banner (dismissible) -->
+    <section id="site-intro" class="intro-banner" role="region" aria-label="Site introduction">
+      <p>
+        <strong>Welcome to airplanes.life!</strong><br>
+        I’m your AI travel concierge—ask me anything from
+        “Find hidden-gem ramen near Shibuya” to
+        “Visualise my JFK → HND flight path” and I’ll sort it out.
+      </p>
+      <button id="intro-close" aria-label="Close introduction">&times;</button>
+    </section>
+
+    <!-- ✦ Chat Float Launcher (optional) -->
+    <button id="chat-launcher" aria-controls="ai-chat" aria-expanded="false">
+      AI Chat
+    </button>
+
+    <!-- 💬 Chat Interface -->
     <section id="ai-chat" aria-label="Chat with AI">
       <h2 class="visually-hidden">AI Chat</h2>
 
-      <!-- ✅  the message list that chat.js appends to -->
       <div id="chat-container" role="log" aria-live="polite"></div>
 
-      <!-- footer sticks to bottom of the card -->
       <div class="chat-footer">
         <form id="input-area" autocomplete="off">
           <label for="chat-input" class="visually-hidden">Type your message</label>
           <input type="text" id="chat-input"
-                 placeholder="Type your message…" required />
-          <button id="send-button" type="submit"
-                  aria-label="Send message">Send</button>
+                 placeholder="Ask me about your trip..." required />
+          <button id="send-button" type="submit" aria-label="Send message">Send</button>
         </form>
 
-        <a class="cta-secondary" href="{{ url_for('model') }}">
-          View 3-D Model <span aria-hidden="true">▶</span>
-        </a>
       </div>
     </section>
+
+    <!-- 🧭 Travel Tools Section -->
+    <section id="travel-tools" aria-label="Travel Tools">
+      <h2 class="section-heading">Travel Tools</h2>
+      <div class="tool-buttons">
+        <button id="quick-itinerary">🗺 Generate Tokyo Food Trip</button>
+        <button id="show-airport">🏟 View JFK Airport Map</button>
+        <button id="show-flight">✈️ Visualize My Flight Path</button>
+
+      </div>
+    </section>
+
   </main>
 
-  <!-- greeting demo -->
+  <!-- Set Greeting Text -->
   <script>
     window.addEventListener('DOMContentLoaded', () =>
       document.getElementById('greeting').textContent =
-        'Hello 👋 – ask me anything!');
+        'Hello 👋 – ready to explore your next adventure?');
   </script>
 
-  <!-- ✅ move chat.js to the very end so elements exist -->
-  <script type="module"
-          src="{{ url_for('static', filename='chat.js') }}"></script>
-</body>
+  <!-- Client-side logic -->
+  <script type="module" src="{{ url_for('static', filename='chat.js') }}"></script>
+  <script>
+    /* Intro banner dismiss */
+    document.getElementById('intro-close')?.addEventListener('click', () => {
+      document.getElementById('site-intro').style.display = 'none';
+    });
 
+    /* Floating chat toggle */
+    const launcher = document.getElementById('chat-launcher');
+    const chatBox  = document.getElementById('ai-chat');
+
+    launcher.addEventListener('click', () => {
+      const isOpen = chatBox.classList.toggle('open');
+      launcher.setAttribute('aria-expanded', isOpen);
+    });
+  </script>
+</body>
 </html>

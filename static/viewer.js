@@ -1,104 +1,98 @@
-// viewer.js – Three-JS model viewer (auto-feeds from models.json)
-import * as THREE            from "three";
-import { GLTFLoader }        from "three/examples/jsm/loaders/GLTFLoader.js";
-import { OrbitControls }     from "three/examples/jsm/controls/OrbitControls.js";
+// model-viewer.js – Three-JS scene that loads glTF / GLB assets
+import * as THREE              from "three";
+import { GLTFLoader }          from "three/examples/jsm/loaders/GLTFLoader.js";
+import { OrbitControls }       from "three/examples/jsm/controls/OrbitControls.js";
+import { MeshoptDecoder }      from "https://cdn.jsdelivr.net/npm/three@0.152.2/examples/jsm/libs/meshopt_decoder.module.js";
 
-import { MeshoptDecoder }    from "meshopt_decoder";
-import { KTX2Loader }        from "ktx2loader";
+const canvasWrap = document.getElementById("three-canvas-container");
 
-const wrap   = document.getElementById("three-canvas-container");
-const width  = wrap.clientWidth  || 800;
-const height = wrap.clientHeight || 600;
+// ---------- scene / camera / renderer ----------
+const scene    = new THREE.Scene();
+scene.background = new THREE.Color(0x000000);
 
-/* ---------- THREE boilerplate ---------- */
+const camera   = new THREE.PerspectiveCamera(
+  60,
+  canvasWrap.clientWidth / canvasWrap.clientHeight,
+  0.1,
+  1000
+);
+camera.position.set(0, 1.5, 4);
+
 const renderer = new THREE.WebGLRenderer({ antialias: true });
-renderer.setSize(width, height);
-wrap.appendChild(renderer.domElement);
-
-const scene  = new THREE.Scene();
-scene.background = new THREE.Color(0xeeeeee);
-
-const camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 1000);
-camera.position.set(0, 2, 20);
+renderer.setSize(canvasWrap.clientWidth, canvasWrap.clientHeight);
+renderer.setPixelRatio(window.devicePixelRatio || 1);
+canvasWrap.appendChild(renderer.domElement);
 
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 
-scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+// ---------- simple lighting ----------
+const hemi = new THREE.HemisphereLight(0xffffff, 0x222222, 1.2);
+scene.add(hemi);
 const dir = new THREE.DirectionalLight(0xffffff, 1);
-dir.position.set(10, 10, 10);
+dir.position.set(5, 10, 7);
 scene.add(dir);
 
-/* ---------- model logic ---------- */
-let currentModel = null;
-const loader = new GLTFLoader();
+// ---------- load first model from models.json ----------
+fetch("/static/assets/3d/models.json")
+  .then(r => r.json())
+  .then(list => {
+    if (!Array.isArray(list) || list.length === 0)
+      throw new Error("models.json is empty");
 
-loader.setMeshoptDecoder(MeshoptDecoder);
+    loadGLB(list[0].path);              // ← load first model
+    createModelPicker(list);            // ← optional drop-down
+  })
+  .catch(err => {
+    console.error(err);
+    const msg = document.createElement("p");
+    msg.textContent = `Failed to load models: ${err.message}`;
+    msg.style.color = "var(--accent)";
+    canvasWrap.appendChild(msg);
+  });
 
-const ktxLoader = new KTX2Loader()
-  .setTranscoderPath("https://cdn.jsdelivr.net/npm/three@0.152.2/examples/jsm/libs/")
-  .detectSupport(renderer);
-loader.setKTX2Loader(ktxLoader);
+function loadGLB(url) {
+  const loader = new GLTFLoader();
+  loader.setMeshoptDecoder(MeshoptDecoder);
 
-/** Load a GLB file (full path). */
-function loadModel(url) {
-  loader.load(
-    url,
-    gltf => {
-      if (currentModel) scene.remove(currentModel);
-      currentModel = gltf.scene;
-      const box = new THREE.Box3().setFromObject(currentModel);
-      const size = box.getSize(new THREE.Vector3()).length();
-      const scale = 4 / size;
-      currentModel.scale.setScalar(scale);
-      scene.add(currentModel);
-    },
-    undefined,
-    err => console.error("GLTF error:", err)
+  loader.load(url, gltf => {
+    // clear previous
+    while (scene.children.find(obj => obj.name === "model"))
+      scene.remove(scene.children.find(obj => obj.name === "model"));
+
+    const obj = gltf.scene;
+    obj.name  = "model";
+    scene.add(obj);
+  }, undefined,
+    err => console.error(err)   // helpful when another extension is missing
   );
 }
 
-/* ---------- populate <select> from manifest ---------- */
-async function populateSelector() {
-  const select = document.getElementById("model-select");
+function createModelPicker(list) {
+  const sel = document.getElementById("model-select");
+  if (!sel) return;
 
-  try {
-    const res  = await fetch("/static/assets/3d/models.json");
-    const list = await res.json();                 // [{id,name,path,tris,…}, …]
+  list.forEach((m, idx) => {
+    const opt = document.createElement("option");
+    opt.value = idx;
+    opt.textContent = m.name ?? `Model ${idx + 1}`;
+    sel.appendChild(opt);
+  });
 
-    // sort alphabetically
-    list.sort((a, b) => a.name.localeCompare(b.name));
-
-    list.forEach(m => {
-      const opt   = document.createElement("option");
-      opt.value = `/static/${m.path}`;                    
-      opt.text    = `${m.name} (${m.tris} tris)`;
-      select.appendChild(opt);
-    });
-
-    if (select.options.length) loadModel(select.value);
-
-    select.addEventListener("change", () => loadModel(select.value));
-  } catch (err) {
-    console.error("Failed to fetch models.json:", err);
-  }
+  sel.addEventListener("change", e => loadGLB(list[e.target.value].path));
 }
 
-/* ---------- render loop ---------- */
-function tick() {
-  requestAnimationFrame(tick);
-  controls.update();
-  renderer.render(scene, camera);
-}
-
-/* ---------- resize ---------- */
+// ---------- resize ----------
 window.addEventListener("resize", () => {
-  const w = wrap.clientWidth, h = wrap.clientHeight;
+  const { clientWidth: w, clientHeight: h } = canvasWrap;
   camera.aspect = w / h;
   camera.updateProjectionMatrix();
   renderer.setSize(w, h);
 });
 
-/* ---------- boot ---------- */
-populateSelector();
-tick();
+// ---------- loop ----------
+(function animate() {
+  requestAnimationFrame(animate);
+  controls.update();
+  renderer.render(scene, camera);
+})();

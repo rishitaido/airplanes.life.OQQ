@@ -49,13 +49,13 @@ def openapi_spec():
 def index():
     return render_template("index.html")
 
-@app.route("/api/hello", methods=["GET"])
-def hello():
-    return jsonify({"msg": "Hello, world!"})
-
 @app.route("/model")
 def model():
     return render_template("model.html")
+
+@app.route("/itinerary")
+def itinerary():
+    return render_template("itinerary.html")
 
 
 if __name__ == "__main__":
