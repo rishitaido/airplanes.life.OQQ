@@ -1,156 +1,126 @@
 """
-ai_routes.py – Zephyr gateway that returns JSON for the frontend.
-
-  • POST /api/ask   {"prompt":"Plan a 3-day trip …"}
-      → { "reply": "...", "itinerary":[ … ] }
-
-If the prompt is NOT travel-related, we still respond with JSON:
-      → { "reply": "Here's the information you asked for." }
+ai_routes.py — OpenRouter AI Assistant (DeepSeek-R1 Qwen3-8B Free)
+===================================================================
+• POST /api/ask        – general assistant (returns plain reply)
+• POST /api/itinerary  – same logic, different UI use
 """
 
 from flask import Blueprint, request, jsonify
 from dotenv import load_dotenv
-import os, re, json, requests, time
+import os, requests, functools
 from cache import init_cache_db, get_cached_response, save_response_to_cache
-
-# ─── HuggingFace setup ─────────────────────────────────────────────
+from limiter_config import limiter
+# ─────────────── Environment & Config ───────────────
 load_dotenv(override=True)
-HUGGINGFACE_API_KEY = os.getenv("HUGGINGFACE_API_KEY", "")
-AI_MODEL   = "HuggingFaceH4/zephyr-7b-beta"
-HF_URL     = f"https://api-inference.huggingface.co/models/{AI_MODEL}"
-HEADERS    = {"Authorization": f"Bearer {HUGGINGFACE_API_KEY}"}
 
-# ─── Flask blueprint & tiny cache ──────────────────────────────────
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "")
+MODEL = "deepseek/deepseek-r1-0528-qwen3-8b:free"
+OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
+HEADERS = {
+    "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+    "Content-Type": "application/json"
+}
+
+# ─────────────── Initialize Flask Blueprint ───────────────
 ai_routes = Blueprint("ai_routes", __name__)
 init_cache_db()
 
-# -------------------------------------------------------------------
+# ─────────────── System Prompt (AI Personality) ───────────────
 SYSTEM_INSTR = """
-You are TripMate, an upbeat, detail-oriented travel-planning assistant for the domain ‘airplanes.life’.
-
-OUTPUT RULES
-• Always respond with one — and only one — valid JSON object.  
-• Do NOT wrap the JSON in markdown, HTML, or code-fences.  
-• Never add keys that are not listed here.
-
-REQUIRED KEYS
-1. "reply"   (string)  
-   - 3–4 vivid sentences that paint the trip’s highlights (signature foods, culture, neighbourhood vibe).  
-   - Stands alone: this is what the chat UI shows.
-
-2. "itinerary" (array) — include only when the user explicitly wants a day-by-day plan.  
-   Each element:  
-     {
-       "day": <integer starting at 1>,
-       "activities": [
-         {
-           "time": "HH:MM",          // 24-hour local time
-           "place": "<short name>",
-           "location": [<lon>, <lat>]   // optional; omit if unknown
-         },
-         …
-       ]
-     }
-   • 5–7 activities per day max.
-
-NON-TRAVEL QUERIES
-If the user is *not* asking for a trip plan, reply with:
-{ "reply": "<helpful answer>" }
-and omit the "itinerary" key.
-
-STYLE
-• Friendly, concise, confident.  
-• Use local currency symbols (€, $, ¥) and appropriate metric/imperial units.  
-• Maintain correct JSON syntax at all times.
-
-EXAMPLE (for guidance only)
-{
-  "reply": "Three flavour-packed days await! From sunrise pastries at the old central market to candle-lit jazz bars at night, you’ll taste, tour and tap into the soul of the city.",
-  "itinerary": [
-    {
-      "day": 1,
-      "activities": [
-        { "time": "08:00", "place": "Central Market – breakfast bites", "location": [12.4924, 41.8902] },
-        { "time": "10:30", "place": "National Art Museum",            "location": [12.4833, 41.8926] },
-        { "time": "13:00", "place": "Local trattoria – pasta class" },
-        { "time": "18:30", "place": "Riverside walk & sunset aperitivo" }
-      ]
-    },
-    {
-      "day": 2,
-      "activities": [
-        { "time": "09:00", "place": "Historic district walking tour" },
-        { "time": "12:30", "place": "Street-food lunch bazaar" },
-        { "time": "16:00", "place": "Craft coffee tasting" },
-        { "time": "20:00", "place": "Rooftop dinner with skyline view" }
-      ]
-    }
-  ]
-}
+You are TripMate, an upbeat, helpful AI assistant for airplanes.life.
+Generate natural, human-readable answers. For itinerary requests, respond with a day-by-day plan in plain text and make sure each day is in the output.
+Example:
+Day 1:
+- Breakfast at Roscioli
+- Visit Colosseum
+- Pasta lunch at Trattoria al Moro
+...etc.
 """
 
-
-
-# ─── Helpers ───────────────────────────────────────────────────────
-def call_zephyr(prompt: str) -> str:
-    """Send prompt → HF Inference, return raw generated_text."""
+# ─────────────── AI Completion Function ───────────────
+def call_openrouter(prompt: str, *, max_tokens: int = 1200) -> str:
+    """
+    Sends prompt to OpenRouter API and returns the AI's reply text.
+    Raises exception on error.
+    """
     payload = {
-        "inputs": f"{SYSTEM_INSTR}\nUser: {prompt}\nAssistant:",
-        "parameters": {
-            "max_new_tokens": 600,
-            "temperature": 0.0,
-            "top_p": 0.9,
-            "do_sample": True,
-            "return_full_text": False,
-        },
+        "model": MODEL,
+        "messages": [
+            { "role": "system", "content": SYSTEM_INSTR.strip() },
+            { "role": "user",   "content": prompt.strip() }
+        ],
+        "max_tokens": max_tokens,
+        "temperature": 0.7
     }
-    res = requests.post(HF_URL, headers=HEADERS, json=payload, timeout=60)
-    if res.status_code != 200:
-        raise RuntimeError(f"HF API {res.status_code}: {res.text[:200]}")
-    data = res.json()
-    if isinstance(data, list) and "generated_text" in data[0]:
-        return data[0]["generated_text"]
-    if isinstance(data, dict) and "generated_text" in data:
-        return data["generated_text"]
-    raise ValueError("Unexpected HF response format")
 
-_JSON_RE = re.compile(r"\{.*\}", re.DOTALL)
+    r = requests.post(OPENROUTER_URL, headers=HEADERS, json=payload, timeout=90)
+    if r.status_code == 401:
+        raise RuntimeError("Invalid OpenRouter API key.")
+    if r.status_code == 402:
+        raise RuntimeError("Quota exceeded or model requires payment.")
+    r.raise_for_status()
 
-def extract_json(txt: str) -> dict:
+    data = r.json()
+    return data["choices"][0]["message"]["content"].strip()
+
+# ─────────────── Decorator for Reusable AI Routes ───────────────
+def ai_endpoint(force_3_days=False):
     """
-    Returns first valid JSON object found in txt.
-    Falls back to {"reply": txt} if nothing parseable.
+    Shared wrapper for API endpoints that call the AI.
+    Supports optional 3-day itinerary formatting override.
     """
-    try:
-        return json.loads(txt)
-    except json.JSONDecodeError:
-        match = _JSON_RE.search(txt)
-        if match:
+    def decorator(fn):
+        @functools.wraps(fn)
+        def wrapper():
+            data = request.get_json(force=True, silent=True) or {}
+            prompt = (data.get("prompt") or "").strip()
+
+            # 🔒 Reject empty or excessively long prompts
+            if not prompt:
+                return jsonify({"error": "Prompt is required"}), 400
+            if len(prompt) > 1000:
+                return jsonify({"error": "Prompt too long (max 1000 characters)"}), 413
+
+            # ✈️ Enforce 3-day formatting if this is an itinerary endpoint
+            if force_3_days: 
+                prompt += (
+                  "\n\nPlease respond with a complete 3-day itinerary for this trip, using the format:\n"
+                  "Day 1:\n- Morning:\n- Afternoon:\n- Evening:\n\n"
+                  "Day 2:\n- Morning:\n- Afternoon:\n- Evening:\n\n"
+                  "Day 3:\n- Morning:\n- Afternoon:\n- Evening:\n\n"
+                  "Be concise but clear. Use plain text only."
+                )
+
+            # 💾 Return cached response if available
+            if cached := get_cached_response(prompt):
+                return jsonify({"reply": cached})
+
+            # 🚀 Call AI and handle errors gracefully
             try:
-                return json.loads(match.group(0))
-            except json.JSONDecodeError:
-                pass
-    return {"reply": txt.strip()}
+                reply = call_openrouter(prompt)
+                if not reply:
+                    raise RuntimeError("Empty response from AI")
+            except Exception as e:
+                reply = f"[ERROR] {e}"
 
-# ─── Route ─────────────────────────────────────────────────────────
+            # 💽 Cache response for future reuse
+            save_response_to_cache(prompt, reply)
+            return jsonify({"reply": reply})
+
+        return wrapper
+    return decorator
+
+# ─────────────── Routes ───────────────
 @ai_routes.route("/api/ask", methods=["POST"])
-def ask():
-    data   = request.get_json(force=True, silent=True) or {}
-    prompt = (data.get("prompt") or "").strip()
-    if not prompt:
-        return jsonify({"error": "empty prompt"}), 400
+@limiter.limit("5 per minute")
+@ai_endpoint()
+def api_ask():
+    """Handles general-purpose AI questions from chat UI."""
+    pass
 
-    # cache check
-    cached = get_cached_response(prompt)
-    if cached:
-        return jsonify(json.loads(cached))
-
-    try:
-        raw_answer = call_zephyr(prompt)
-        answer_obj = extract_json(raw_answer)
-    except Exception as e:
-        answer_obj = {"reply": f"[ERROR] {str(e)}"}
-
-    # save to cache & return
-    save_response_to_cache(prompt, json.dumps(answer_obj))
-    return jsonify(answer_obj)
+@ai_routes.route("/api/itinerary", methods=["POST"])
+@limiter.limit("4 per minute")
+@ai_endpoint(force_3_days=True)
+def api_itinerary():
+    """Handles AI-generated 3-day itineraries for map UI."""
+    pass

@@ -32,12 +32,7 @@
       <button id="intro-close" aria-label="Close introduction">&times;</button>
     </section>
 
-    <!-- ✦ Chat Float Launcher (optional) -->
-    <button id="chat-launcher" aria-controls="ai-chat" aria-expanded="false">
-      AI Chat
-    </button>
-
-    <!-- 💬 Chat Interface -->
+    
     <section id="ai-chat" aria-label="Chat with AI">
       <h2 class="visually-hidden">AI Chat</h2>
 
@@ -46,16 +41,15 @@
       <div class="chat-footer">
         <form id="input-area" autocomplete="off">
           <label for="chat-input" class="visually-hidden">Type your message</label>
-          <input type="text" id="chat-input"
-                 placeholder="Ask me about your trip..." required />
+          <input type="text" id="chat-input" placeholder="Ask me about your trip..." required />
           <button id="send-button" type="submit" aria-label="Send message">Send</button>
         </form>
-
       </div>
     </section>
 
     <!-- 🧭 Travel Tools Section -->
     <section id="travel-tools" aria-label="Travel Tools">
+
       <h2 class="section-heading">Travel Tools</h2>
       <div class="tool-buttons">
         <button id="quick-itinerary">🗺 Generate Tokyo Food Trip</button>
@@ -76,20 +70,26 @@
 
   <!-- Client-side logic -->
   <script type="module" src="{{ url_for('static', filename='chat.js') }}"></script>
+  <script type="module" src="{{ url_for('static', filename='travel-tools.js') }}"></script>
+  
   <script>
     /* Intro banner dismiss */
     document.getElementById('intro-close')?.addEventListener('click', () => {
       document.getElementById('site-intro').style.display = 'none';
     });
 
-    /* Floating chat toggle */
+    /* Floating chat toggle 
     const launcher = document.getElementById('chat-launcher');
     const chatBox  = document.getElementById('ai-chat');
 
     launcher.addEventListener('click', () => {
       const isOpen = chatBox.classList.toggle('open');
       launcher.setAttribute('aria-expanded', isOpen);
-    });
+    }); */
+    
+
   </script>
 </body>
 </html>
+
+

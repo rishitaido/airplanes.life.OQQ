@@ -139,3 +139,4 @@ window.addEventListener("resize", () => {
   controls.update();
   renderer.render(scene, camera);
 })();
+

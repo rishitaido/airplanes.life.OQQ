@@ -3,32 +3,84 @@
 <head>
   <meta charset="UTF-8" />
   <title>Trip Itinerary Viewer</title>
+
+  <!-- ✅ Stylesheets: Load Bootstrap overrides first, then main styles -->
   <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap-override.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-  <link href="https://api.mapbox.com/mapbox-gl-js/v3.1.2/mapbox-gl.css" rel="stylesheet"/>
-
-  <style>
-    /* Page layout */
-    main{display:grid;grid-template-columns:320px 1fr;gap:1rem}
-    #map{width:100%;height:calc(100vh - 130px);border:1px solid var(--border);border-radius:var(--radius)}
-    #itinerary{overflow-y:auto;max-height:calc(100vh - 130px);padding:.5rem .75rem;background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius)}
-    #itinerary h3{margin:.5rem 0}
-    #itinerary .activity{margin-left:.75rem;padding:.25rem 0;border-left:2px solid var(--accent)}
-
-  </style>
 </head>
-<body>
-  <header><h1>🗺️ Trip Itinerary Viewer</h1></header>
 
-  <main>
-    <section id="itinerary" aria-label="Planned activities"></section>
-    <div id="map" aria-label="Interactive 3-D map"></div>
+<body class="floating-chat">
+  <!-- 🧭 Page Header -->
+  <header>
+    <h1>🗺️ Trip Itinerary Viewer</h1>
+  </header>
+
+  <!-- 🛠️ Main Builder + Itinerary Layout -->
+  <main style="max-width: 800px; margin: 0 auto; display: block;">
+    
+    <!-- 📋 Itinerary Builder Form -->
+    <section id="itinerary-builder" class="card" style="margin-bottom:1rem;">
+      <h2>📝 Build your itinerary</h2>
+      <form id="itinerary-form">
+        <label>
+          City
+          <input type="text" name="city" placeholder="e.g. Rome" required />
+        </label>
+        <label>
+          Days
+          <input type="number" name="days" min="1" max="14" value="3" required />
+        </label>
+        <label>
+          Theme
+          <select name="theme">
+            <option>Food & Culture</option>
+            <option>Nature & Outdoors</option>
+            <option>Museums & History</option>
+            <option>Luxury & Relaxation</option>
+          </select>
+        </label>
+
+        <!-- 🚀 Action Buttons -->
+        <button id="build-btn" type="submit">Generate</button>
+        <span id="build-spinner" hidden>⏳</span>
+        <button type="button" id="save-btn" hidden>💾 Save</button>
+      </form>
+    </section>
+
+    <!-- 📄 AI-Generated Itinerary Output -->
+    <div style="overflow-y: auto; max-height: 70vh;">
+      <section id="viewer-output" class="card" style="padding: 1rem;">
+        <!-- JS will dynamically inject collapsible day sections here -->
+      </section>
     </div>
   </main>
+
+  <!-- 💬 Hidden Chat Interface for future AI interaction -->
+  <section id="chat-ui" class="chat-ui hidden">
+    <div id="chat-container" class="chat-container"></div>
+    <div id="input-area" class="input-area">
+      <input type="text" id="chat-input" placeholder="Ask TripMate..." />
+      <button id="send-button">Send</button>
+    </div>
+    <button id="open-itinerary" hidden>View Saved Itinerary</button>
+  </section>
   
-  <p style="margin-top:1rem"><a class="cta-secondary" href="{{ url_for('index') }}">← Back to AI Chat</a></p>
+  <!-- 🔙 Navigation Back to Home -->
+  <p style="margin-top:1rem">
+    <a class="cta-secondary" href="{{ url_for('index') }}">← Back to HomePage</a>
+  </p>
 
+  <!-- 📦 JavaScript Modules -->
   <script type="module" src="{{ url_for('static', filename='viewer.js') }}"></script>
+  <script type="module" src="{{ url_for('static', filename='travel-tools.js') }}"></script>
+  <script type="module" src="{{ url_for('static', filename='itinerary-display.js') }}"></script>
+  <script type="module" src="{{ url_for('static', filename='chat.js') }}"></script>
 
+  <!-- 🧠 Chat UI Toggle Logic -->
+  <script>
+    document.getElementById("chat-toggle")?.addEventListener("click", () => {
+      document.getElementById("chat-ui")?.classList.toggle("hidden");
+    });
+  </script>
 </body>
 </html>

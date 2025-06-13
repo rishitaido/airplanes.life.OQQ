@@ -4,8 +4,13 @@ from flask_swagger_ui import get_swaggerui_blueprint
 import os
 from prometheus_client import Counter, Histogram, generate_latest
 import time 
+from limiter_config import limiter
+
 
 app = Flask(__name__)
+limiter.init_app(app)  # Apply rate limits to this blueprint
+app.register_blueprint(ai_routes)
+
 
 # 1) Define your metrics
 REQUEST_COUNT   = Counter('request_count', 'Total HTTP requests', ['method', 'endpoint'])
@@ -28,7 +33,6 @@ def metrics():
     return generate_latest(), 200, {'Content-Type': 'text/plain; charset=utf-8'}
 
 
-app.register_blueprint(ai_routes)
 
 SWAGGER_URL = '/docs'
 API_URL     = '/openapi.yaml'

@@ -1,14 +1,14 @@
 /* ─── CSS Variables – light theme ──────────────────────────────── */
 :root {
-  --bg:             #f7f9fc;          /* page background */
-  --bg-elevated:    #ffffff;          /* cards / panels */
-  --border:         #d9e2ec;          /* subtle outline */
+  --bg:             #f2f4f8;          /* softened light gray for page */
+  --bg-elevated:    #ffffff;          /* pure white for cards */
+  --border:         #ccd6e0;          /* lighter subtle outline */
   --text:           #2e2f36;          /* main copy */
   --accent:         #00bcd4;          /* cyan */
   --accent-dark:    #0099ad;          /* cyan-700 */
   --radius:         10px;
-  --shadow:         0 4px 12px rgba(21, 25, 30, 0.08);
-  --fz-base:        17px;             /* ↑ base size for readability */
+  --shadow:         0 4px 12px rgba(0, 0, 0, 0.04); /* softer shadow */
+  --fz-base:        17px;
 }
 
 /* ─── Reset / base ─────────────────────────────────────────────── */
@@ -22,6 +22,10 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+  padding-bottom: 5rem;
 }
 
 /* ─── Header ───────────────────────────────────────────────────── */
@@ -202,8 +206,8 @@ layout-narrow { max-width: 780px; margin: auto; width: 100%; }
   justify-content: space-between;
   align-items: flex-start;
   gap: 1rem;
-  background: #e0f7fa;
-  color: #004d40;
+  background: #e6f7fb; /* softer cyan background */
+  color: #005b63;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 1rem 1.25rem;
@@ -223,8 +227,8 @@ layout-narrow { max-width: 780px; margin: auto; width: 100%; }
 
 #intro-close:hover { opacity: .7; }
 
-/* ─── Floating Chat Launcher & Panel ─────────────────────────── */
-#chat-launcher {
+/* ── floating chat launcher and ai-chat positioning scoped to .floating-chat ── */
+.floating-chat #chat-launcher {
   position: fixed;
   bottom: 1.5rem;
   right: 1.5rem;
@@ -241,11 +245,13 @@ layout-narrow { max-width: 780px; margin: auto; width: 100%; }
   z-index: 1000;
 }
 
-#chat-launcher:hover { background: var(--accent-dark); }
+.floating-chat #chat-launcher:hover {
+  background: var(--accent-dark);
+}
 
-#ai-chat {
+.floating-chat #ai-chat {
   position: fixed;
-  bottom: 90px;          /* 56 px button + 20 px gap */
+  bottom: 90px;
   right: 1.5rem;
   width: 360px;
   max-height: 70vh;
@@ -256,11 +262,13 @@ layout-narrow { max-width: 780px; margin: auto; width: 100%; }
   z-index: 1000;
 }
 
-#ai-chat.open {
+.floating-chat #ai-chat.open {
   opacity: 1;
   visibility: visible;
   transform: translateY(0);
 }
+
+/* ─── Intro Banner ───────────────────────────────────────────── */
 
 /* ─── Animations ─────────────────────────────────────────────── */
 .fade-in { animation: fade 0.6s ease-in; }
@@ -341,9 +349,76 @@ layout-narrow { max-width: 780px; margin: auto; width: 100%; }
 .tool-buttons button:active,
 .tool-buttons a:active { transform: translateY(1px); }
 
+/* travel-tools bits – extend your existing palette */
+.tool-card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem;
+  margin-block: 1rem;
+  box-shadow: var(--shadow);
+}
+
+#itinerary-builder {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+#itinerary-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+#itinerary-form label {
+  display: block;
+  margin-block: .5rem;
+}
+#itinerary-form input,
+#itinerary-form select {
+  width: 100%;
+  padding: .4rem .6rem;
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+#itinerary-form button {
+  margin-top: .8rem;
+  margin-right: .5rem;
+}
+
+#itinerary {
+  overflow-y: auto;
+  max-height: calc(100vh - 130px);
+  padding: 1rem 1.25rem;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  width: 100%;
+  box-sizing: border-box;
+  font-size: 1rem;
+  line-height: 1.6;
+}
 
 @media (max-width: 600px) {
   .header-ctas .cta-secondary { font-size: 0.85rem; padding: 0.5rem 0.9rem; }
   .tool-buttons { grid-template-columns: 1fr; }
 }
 
+
+#viewer-output {
+  font-size: 0.92rem;         /* smaller readable text */
+  line-height: 1.5;
+  white-space: pre-wrap;      /* preserve line breaks */
+  font-family: "Segoe UI", Tahoma, sans-serif;
+  background: var(--bg-elevated);
+  padding: 1rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  max-height: 70vh;
+  overflow-y: auto;
+
+}
