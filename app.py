@@ -61,6 +61,9 @@ def model():
 def itinerary():
     return render_template("itinerary.html")
 
+@app.route("/airports")
+def airports():
+    return render_template("airports.html", maptiler_key=os.getenv("MAPTILER_KEY"))
 
 if __name__ == "__main__":
     app.run(debug=True)

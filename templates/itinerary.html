@@ -2,84 +2,104 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Trip Itinerary Viewer</title>
 
-  <!-- ✅ Stylesheets: Load Bootstrap overrides first, then main styles -->
-  <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap-override.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 
-<body class="floating-chat">
-  <!-- 🧭 Page Header -->
-  <header>
-    <h1>🗺️ Trip Itinerary Viewer</h1>
-  </header>
+<body class="layout-page">
+  <!-- Full page background image wrapper -->
+  <section class="page-bg-itinerary">
 
-  <!-- 🛠️ Main Builder + Itinerary Layout -->
-  <main style="max-width: 800px; margin: 0 auto; display: block;">
-    
-    <!-- 📋 Itinerary Builder Form -->
-    <section id="itinerary-builder" class="card" style="margin-bottom:1rem;">
-      <h2>📝 Build your itinerary</h2>
-      <form id="itinerary-form">
-        <label>
-          City
-          <input type="text" name="city" placeholder="e.g. Rome" required />
-        </label>
-        <label>
-          Days
-          <input type="number" name="days" min="1" max="14" value="3" required />
-        </label>
-        <label>
-          Theme
-          <select name="theme">
-            <option>Food & Culture</option>
-            <option>Nature & Outdoors</option>
-            <option>Museums & History</option>
-            <option>Luxury & Relaxation</option>
-          </select>
-        </label>
+    <!-- Header -->
+    <header class="subheader">
+      <a class="cta-secondary" href="{{ url_for('index') }}">← Back to Home</a>
+    </header>
 
-        <!-- 🚀 Action Buttons -->
-        <button id="build-btn" type="submit">Generate</button>
-        <span id="build-spinner" hidden>⏳</span>
-        <button type="button" id="save-btn" hidden>💾 Save</button>
-      </form>
-    </section>
+    <!-- Main content -->
+    <main class="layout-narrow fade-in">
 
-    <!-- 📄 AI-Generated Itinerary Output -->
-    <div style="overflow-y: auto; max-height: 70vh;">
-      <section id="viewer-output" class="card" style="padding: 1rem;">
-        <!-- JS will dynamically inject collapsible day sections here -->
+      <h1> Trip Itinerary Viewer</h1>
+
+      <!-- Itinerary Builder Form -->
+      <section id="itinerary-builder" class="card">
+        <h2>Build your itinerary</h2>
+        <form id="itinerary-form">
+          <label>
+            City
+            <input id="city" type="text" name="city" placeholder="e.g. Rome" required />
+          </label>
+          <label>
+            Days
+            <input id="days" type="number" name="days" min="1" max="14" value="3" required />
+          </label>
+          <label>
+            Theme
+            <select id="theme" name="theme">
+              <option>Food & Culture</option>
+              <option>Nature & Outdoors</option>
+              <option>Museums & History</option>
+              <option>Luxury & Relaxation</option>
+            </select>
+          </label>
+
+          <button id="build-btn" type="submit">Generate</button>
+          <span id="build-spinner" hidden>⏳</span>
+        </form>
       </section>
-    </div>
-  </main>
 
-  <!-- 💬 Hidden Chat Interface for future AI interaction -->
-  <section id="chat-ui" class="chat-ui hidden">
-    <div id="chat-container" class="chat-container"></div>
-    <div id="input-area" class="input-area">
-      <input type="text" id="chat-input" placeholder="Ask TripMate..." />
-      <button id="send-button">Send</button>
-    </div>
-    <button id="open-itinerary" hidden>View Saved Itinerary</button>
+      <!-- Itinerary Output -->
+      <section id="viewer-output" class="card" style="padding: 1rem;">
+        <!-- Collapsible sections will be injected here -->
+      </section>
+
+    </main>
+
   </section>
-  
-  <!-- 🔙 Navigation Back to Home -->
-  <p style="margin-top:1rem">
-    <a class="cta-secondary" href="{{ url_for('index') }}">← Back to HomePage</a>
-  </p>
 
-  <!-- 📦 JavaScript Modules -->
-  <script type="module" src="{{ url_for('static', filename='viewer.js') }}"></script>
-  <script type="module" src="{{ url_for('static', filename='travel-tools.js') }}"></script>
-  <script type="module" src="{{ url_for('static', filename='itinerary-display.js') }}"></script>
-  <script type="module" src="{{ url_for('static', filename='chat.js') }}"></script>
+  <!-- JS -->
+  <script type="module">
+    import { renderJSONItinerary } from "{{ url_for('static', filename='itinerary-display.js') }}";
 
-  <!-- 🧠 Chat UI Toggle Logic -->
-  <script>
-    document.getElementById("chat-toggle")?.addEventListener("click", () => {
-      document.getElementById("chat-ui")?.classList.toggle("hidden");
+    document.getElementById("build-btn").addEventListener("click", async (e) => {
+      e.preventDefault();
+      const city  = document.getElementById("city").value.trim();
+      const days  = parseInt(document.getElementById("days").value, 10);
+      const theme = document.getElementById("theme").value;
+
+      if (!city || !days) {
+        alert("Please enter a city and number of days.");
+        return;
+      }
+
+      const payload = { prompt: { city, days, theme }, days };
+
+      document.getElementById("build-spinner").hidden = false;
+
+      try {
+        const res = await fetch("/api/itinerary", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+
+        try {
+          const parsed = JSON.parse(data.reply);
+          renderJSONItinerary(parsed);
+          localStorage.setItem("itineraryJSON", JSON.stringify(parsed));
+        } catch (err) {
+          console.error("AI reply is not JSON:", err);
+          alert("Error: AI did not return a valid itinerary.");
+        }
+      } catch (err) {
+        console.error("Failed to fetch itinerary:", err);
+        alert("Error contacting the AI.");
+      } finally {
+        document.getElementById("build-spinner").hidden = true;
+      }
     });
   </script>
 </body>

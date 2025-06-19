@@ -3,12 +3,12 @@
  *  ▸ Auto-frames the camera around every new model
  *  ▸ Adds a touch more ambient light so dark PBR assets aren’t black
  */
-import * as THREE                 from "three";
-import { GLTFLoader }             from "three/examples/jsm/loaders/GLTFLoader.js";
-import { DRACOLoader }            from "three/examples/jsm/loaders/DRACOLoader.js";
-import { KTX2Loader }            from "three/examples/jsm/loaders/KTX2Loader.js";
+import * as THREE                 from "https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.module.js";
+import { GLTFLoader }             from "https://cdn.jsdelivr.net/npm/three@0.152.2/examples/jsm/loaders/GLTFLoader.js";
+import { DRACOLoader }            from "https://cdn.jsdelivr.net/npm/three@0.152.2/examples/jsm/loaders/DRACOLoader.js";
+import { KTX2Loader }            from "https://cdn.jsdelivr.net/npm/three@0.152.2/examples/jsm/loaders/KTX2Loader.js";
 import { MeshoptDecoder }         from "https://cdn.jsdelivr.net/npm/three@0.152.2/examples/jsm/libs/meshopt_decoder.module.js";
-import { OrbitControls }          from "three/examples/jsm/controls/OrbitControls.js";
+import { OrbitControls }          from "https://cdn.jsdelivr.net/npm/three@0.152.2/examples/jsm/controls/OrbitControls.js";
 
 const canvasWrap = document.getElementById("three-canvas-container");
 

@@ -5,7 +5,10 @@ services:
     build: .
     ports:
       - "5000:5000"
-    # Ensure your app logs go to stdout so Loki/Promtail can pick them up
+    restart: unless-stopped
+    env_file:
+      - .env
+    # Make sure app logs to stdout
 
   prometheus:
     image: prom/prometheus:latest
@@ -17,11 +20,10 @@ services:
   grafana:
     image: grafana/grafana:latest
     environment:
-      - GF_SECURITY_ADMIN_PASSWORD=secret
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
     ports:
       - "3000:3000"
 
-  # (Optional) Loki + Promtail for log aggregation:
   loki:
     image: grafana/loki:2.8.2
     container_name: loki
@@ -38,9 +40,7 @@ services:
     command: -config.file=/etc/promtail/config.yml
     volumes:
       - ./promtail/config.yml:/etc/promtail/config.yml:ro
-      # Mount host log directories you want to scrape:
       - /var/log:/var/log:ro
-      # Persist Promtail’s positions file so it remembers where it left off:
       - promtail-data:/promtail
     depends_on:
       - loki

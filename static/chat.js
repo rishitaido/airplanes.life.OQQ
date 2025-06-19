@@ -10,7 +10,8 @@
 const API_CHAT     = "/api/ask";
 const API_GREETING = null;               // set to "/api/greeting" if you add one
 
-import { renderFormattedItinerary } from "./itinerary-display.js";
+import { renderJSONItinerary } from "./itinerary-display.js";
+
 //--------------------------------------------------------------
 // Greeting banner
 //--------------------------------------------------------------
@@ -35,6 +36,7 @@ if (greetEl) {
 const chatWrap = document.getElementById("chat-container");
 const inputEl  = document.getElementById("chat-input");
 const sendBtn  = document.getElementById("send-button");
+const quickBtn = document.getElementById("quick-itinerary");
 
 const addMsg = (role, text = "") => {
   const div = document.createElement("div");
@@ -55,32 +57,19 @@ const saveItinerary = (replyText) => {
 };
 
 //--------------------------------------------------------------
-// Main send logic
+// Main send logic (plain chat or optional override)
 //--------------------------------------------------------------
-const sendMessage = async () => {
-  const dayInput = document.querySelector("input[name='days']");
-  const selectedDays = dayInput ? parseInt(dayInput.value, 10) : null;
-  const prompt = `You are a travel planning assistant. Create a full ${selectedDays}-day itinerary based on the following request.
+const sendMessage = async (promptOverride = null) => {
+  const userPrompt = promptOverride ?? inputEl.value.trim();
+  if (!userPrompt) return;
 
-  The itinerary must include exactly ${selectedDays} clearly labeled sections such as:
+  // UI: push user bubble + clear input (for plain chat only)
+  addMsg("user", userPrompt);
+  if (!promptOverride) {
+    inputEl.value = "";
+    inputEl.focus();
+  }
 
-  Day 1:  
-  Day 2:  
-  Day 3:  
-  ...  
-
-  Do not summarize or skip days. Make sure each day has at least a morning, afternoon, and evening activity.
-
-  User request: ${inputEl.value.trim()}`;
-  
-  if (!prompt.trim()) return;
-
-  // UI: push user bubble + clear input
-  addMsg("user", prompt);
-  inputEl.value = "";
-  inputEl.focus();
-
-  // UI: placeholder AI bubble
   const aiDiv = addMsg("ai", "…");
   sendBtn.disabled = true;
 
@@ -88,66 +77,43 @@ const sendMessage = async () => {
     const res = await fetch(API_CHAT, {
       method : "POST",
       headers: { "Content-Type": "application/json" },
-      body   : JSON.stringify({ prompt })
+      body   : JSON.stringify({ prompt: userPrompt })
     });
 
-    const isJSON = res.headers
-      .get("content-type")
-      ?.includes("application/json");
+    const isJSON = res.headers.get("content-type")?.includes("application/json");
 
-    //----------------------------------------------------------
-    // 1) Standard JSON response (most common, fastest)
-    //----------------------------------------------------------
     if (isJSON) {
+      // ---------- JSON reply ----------
       const data = await res.json();
-      renderFormattedItinerary(data.reply, aiDiv);
-
-      const expectedDays = selectedDays || null;
-
-      // Count how many "Day X" entries were returned by the AI
-      const dayMatches = data.reply.match(/Day \d+[:\s]/g) || [];
-      const numReturnedDays = dayMatches.length;
-
-      // Save if there is at least 1 day
-      if (numReturnedDays > 0) {
-        saveItinerary(data.reply);
-      }
-
-      // Alert if expected days were not fully returned
-      if (expectedDays && numReturnedDays < expectedDays) {
-        alert(`⚠️ Only ${numReturnedDays} day(s) were generated out of the ${expectedDays} requested. Try rewording your prompt for clarity.`);
-      }
-
-      return;
-    }
-
-    //----------------------------------------------------------
-    // 2) Streaming / text response fallback
-    //----------------------------------------------------------
-    const reader  = res.body.getReader();
-    const decoder = new TextDecoder();
-    let buffer    = "";
-
-    while (true) {
-      const { value, done } = await reader.read();
-      if (done) break;
-      buffer += decoder.decode(value, { stream: true });
-      aiDiv.textContent = `AI: ${buffer}`;
-      chatWrap.scrollTop = chatWrap.scrollHeight;
-    }
-
-    // Try to parse the finished stream as JSON
-    try {
-      const data = JSON.parse(buffer);
-      if (data.reply?.includes("Day 1")) {
-        saveItinerary(data.reply);
-        if (data.reply?.includes("Day 1") && !data.reply.includes("Day 2")) {
-          alert("⚠️ Only one day was generated. Try asking for a 3-day itinerary explicitly.");
+      try {
+        const parsed = JSON.parse(data.reply);
+        if (Array.isArray(parsed)) {
+          renderJSONItinerary(parsed, aiDiv);
+          localStorage.setItem("itineraryJSON", JSON.stringify(parsed));
+          saveItinerary(data.reply);   // ✅ ONLY save if parsed array!
+          return;
         }
+      } catch (err) {
+        console.log("AI reply is not JSON — fallback to plain text.");
       }
-    } catch {
-      /* plain-text answer — nothing else to do */
+
+      // Fallback — plain text
+      aiDiv.textContent = `AI: ${data.reply}`;
+
+    } else {
+      // ---------- Streaming fallback ----------
+      const reader  = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer    = "";
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        aiDiv.textContent = `AI: ${buffer}`;
+        chatWrap.scrollTop = chatWrap.scrollHeight;
+      }
     }
+
   } catch (err) {
     console.error(err);
     aiDiv.textContent = `AI: [ERROR] ${err.message}`;
@@ -159,8 +125,14 @@ const sendMessage = async () => {
 //--------------------------------------------------------------
 // UI wiring
 //--------------------------------------------------------------
-sendBtn?.addEventListener("click", sendMessage);
 
+// Send button click
+sendBtn?.addEventListener("click", (e) => {
+  e.preventDefault();
+  sendMessage();
+});
+
+// Enter key
 inputEl?.addEventListener("keydown", (e) => {
   if (e.key === "Enter" && !e.shiftKey) {
     e.preventDefault();
@@ -168,7 +140,7 @@ inputEl?.addEventListener("keydown", (e) => {
   }
 });
 
-// If #input-area is a <form>, stop its natural submit
+// Form submit fallback
 const inputArea = document.getElementById("input-area");
 if (inputArea?.tagName === "FORM") {
   inputArea.addEventListener("submit", (e) => {
@@ -177,13 +149,10 @@ if (inputArea?.tagName === "FORM") {
   });
 }
 
-//--------------------------------------------------------------
-// Quick-demo helper (optional)
-//--------------------------------------------------------------
-document
-  .getElementById("quick-itinerary")
-  ?.addEventListener("click", () => {
-    inputEl.value =
-      "Create a detailed 3-day Tokyo itinerary with headings like 'Day 1:', 'Day 2:', and 'Day 3:'. Include food and cultural activities.";
-    sendMessage();
-  });
+// Tokyo demo button
+quickBtn?.addEventListener("click", () => {
+  const demoPrompt =
+    "You are a travel planner. Create a detailed 3‑day Tokyo itinerary focused on food and culture. " +
+    "Label each day ('Day 1', 'Day 2', 'Day 3') and include morning, afternoon, evening activities.";
+  sendMessage(demoPrompt);
+});

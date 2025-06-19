@@ -1,80 +1,57 @@
-// itinerary-display.js — single source of truth for pretty trip cards
-// ---------------------------------------------------------------
+// itinerary-display-v2.js
+// ===================================================
+// JSON-based trip display — simple, clean, fast!
+// Supports:
+// - Auto-loading JSON itinerary from localStorage
+// - Rendering each day (collapsible)
+// - Handles long trips (5, 7, 10+ days)
+// ===================================================
 
-export function renderFormattedItinerary(rawText, target = "#viewer-output") {
+export function renderJSONItinerary(itineraryArray, target = "#viewer-output") {
   const container =
     typeof target === "string" ? document.querySelector(target) : target;
-  if (!container || !rawText) return;
 
-  container.innerHTML = "";                     // clear previous output
-  const parts = rawText.split(/Day\s+(\d+)\s*[:\n]/i).slice(1); // ["1", " ...", "2", " ...", …]
-
-  for (let i = 0; i < parts.length; i += 2) {
-    const num  = parts[i];
-    const body = parts[i + 1];
-    if (!body) continue;
-
-    const html = body
-      .trim()
-      .split(/\n+/)
-      .map(l =>
-        `<p>${l.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
-               .replace(/^\*\s*/, "")}</p>`
-      )
-      .join("");
-
-    const d = document.createElement("details");
-    d.className = "message ai";
-    d.innerHTML = `
-      <summary><strong>Day ${num}</strong></summary>
-      <div style="margin-top:.5rem">${html}</div>
-    `;
-    container.appendChild(d);
+  // SAFETY: skip invalid data
+  if (!container || !Array.isArray(itineraryArray)) {
+    // No console.warn spam — fail silently
+    return;
   }
-}
 
-// Auto-render any cached itinerary when a page containing #viewer-output loads
-window.addEventListener("DOMContentLoaded", () => {
-  const cached = localStorage.getItem("itineraryText");
-  if (cached) renderFormattedItinerary(cached);
-});
+  container.innerHTML = ""; // Clear previous
 
-
-export function renderItineraryAsDropdowns(itineraryText) {
-  const container = document.getElementById("viewer-output");
-  if (!container) return;
-
-  container.innerHTML = ""; // Clear previous output
-
-  const daySections = itineraryText.split(/Day (\d+):/).slice(1);
-
-  for (let i = 0; i < daySections.length; i += 2) {
-    const dayNum = daySections[i];
-    const dayContentRaw = daySections[i + 1];
-
-    if (!dayContentRaw) continue;
-
-    const dayTitle = `Day ${dayNum}`;
-    const htmlContent = dayContentRaw
-      .trim()
-      .split(/\n+/)
-      .map(line => `<p>${line.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>").replace(/^\* /, "")}</p>`)
-      .join("");
+  itineraryArray.forEach(day => {
+    const html = `
+      <p><strong>Morning:</strong> ${day.morning}</p>
+      <p><strong>Afternoon:</strong> ${day.afternoon}</p>
+      <p><strong>Evening:</strong> ${day.evening}</p>
+    `;
 
     const block = document.createElement("details");
-    block.classList.add("message", "ai");
+    block.className = "message ai";
     block.innerHTML = `
-      <summary><strong>${dayTitle}</strong></summary>
-      <div style="margin-top: 0.5rem;">${htmlContent}</div>
+      <summary><strong>Day ${day.day}</strong></summary>
+      <div style="margin-top: .5rem;">${html}</div>
     `;
 
     container.appendChild(block);
-  }
+  });
 }
 
+// ===================================================
+// Auto-render any cached JSON itinerary
+// ===================================================
+
 window.addEventListener("DOMContentLoaded", () => {
-  const saved = localStorage.getItem("itineraryText");
-  if (saved) {
-    renderItineraryAsDropdowns(saved);
+  const savedJSON = localStorage.getItem("itineraryJSON");
+  if (savedJSON) {
+    try {
+      const itinerary = JSON.parse(savedJSON);
+      if (Array.isArray(itinerary)) {
+        renderJSONItinerary(itinerary);
+        console.log(`✅ Loaded cached itinerary — ${itinerary.length} days`);
+      }
+    } catch (err) {
+      // silently skip bad data
+    }
   }
 });

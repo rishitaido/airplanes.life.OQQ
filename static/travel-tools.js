@@ -1,87 +1,61 @@
-// travel-tools.js — mini-app that talks to /api/itinerary
+// travel-tools.js — mini-app tools for index.html
 // =======================================================
-// 1. Collects city / days / theme from the form
-// 2. Sends the prompt to Flask
-// 3. Renders a pretty accordion itinerary using renderFormattedItinerary
-// -------------------------------------------------------
+// 1. Quick Tokyo trip demo → sends to /api/ask
+// 2. “View Airport Map” button → /airports
+// 3. (future) Visualize flight path
+// =======================================================
 
-import { renderFormattedItinerary } from "./itinerary-display.js";
-
-// ---------- DOM ELEMENTS -----------------------------------------
-const form   = document.getElementById("itinerary-form");   // <form>
-const output = document.getElementById("viewer-output");    // results pane
-const btn    = document.getElementById("build-btn");        // submit button
-const spin   = document.getElementById("build-spinner");    // tiny ⏳ icon
-const save   = document.getElementById("save-btn");         // optional save
-
-// ---------- MAIN EVENT -------------------------------------------
-form?.addEventListener("submit", async (e) => {
-  e.preventDefault();
-
-  // UX state
-  btn.disabled = true;
-  spin.hidden  = false;
-  output.hidden = true;
-  output.innerHTML = "";
-
-  // -------- grab user inputs -------------------------------------
-  const fd    = new FormData(form);
-  const city  = (fd.get("city")  || "").trim();   // e.g. "New York City"
-  const days  = fd.get("days")   || "3";          // "3"
-  const theme = fd.get("theme")  || "Food & Culture";
-
-  // -------- craft the prompt -------------------------------------
-  const prompt = `
+document.getElementById("quick-itinerary")?.addEventListener("click", async () => {
+  const demoPrompt = `
     You are a travel planner.
-    Create a detailed ${days}-day itinerary for ${city} focused on ${theme}.
-    Each day should have a clear header like "Day 1", "Day 2", etc.,
-    followed by 4-6 bullet points of specific activities with times and locations.
-    Be concise but complete. Do not skip any day.
+    Create a detailed 3-day Tokyo itinerary focused on food and culture.
+    Return the itinerary in JSON format:
+    [
+      { "day": 1, "morning": "...", "afternoon": "...", "evening": "..." },
+      { "day": 2, "morning": "...", "afternoon": "...", "evening": "..." },
+      { "day": 3, "morning": "...", "afternoon": "...", "evening": "..." }
+    ]
+    Return ONLY the JSON array. No extra text.
   `.trim();
 
   try {
-    // -------- call the backend -----------------------------------
-    const res = await fetch("/api/itinerary", {
+    const res = await fetch("/api/ask", {
       method : "POST",
       headers: { "Content-Type": "application/json" },
-      body   : JSON.stringify({ prompt })
+      body   : JSON.stringify({ prompt: demoPrompt })
     });
-    if (!res.ok) throw new Error(`AI ${res.status}`);
 
-    const { reply } = await res.json();        // backend ⇒ { reply: string }
-    console.log("🟢 AI reply", reply);
+    const data = await res.json();
 
-    if (!reply) {
-      showEmpty();
-      return;
+    try {
+      const parsed = JSON.parse(data.reply);
+      console.log("✅ Demo itinerary:", parsed);
+
+      // Save to localStorage for /itinerary
+      localStorage.setItem("itineraryJSON", JSON.stringify(parsed));
+
+      // Optional: show quick notification:
+      alert(`Tokyo itinerary saved — ${parsed.length} days! Go to /itinerary to view.`);
+    } catch (err) {
+      console.error("AI reply is not JSON:", err);
+      alert("Error: AI did not return a valid itinerary.");
     }
-
-    // -------- cache + pretty-render ------------------------------
-    localStorage.setItem("itineraryText", reply);   // for /itinerary viewer
-    renderFormattedItinerary(reply, output);
-
   } catch (err) {
     console.error(err);
-    alert(`Couldn’t generate an itinerary – ${err.message}`);
-  } finally {
-    btn.disabled  = false;
-    spin.hidden   = true;
-    output.hidden = false;
-    output.scrollIntoView({ behavior: "smooth" });
+    alert(`Couldn’t fetch demo itinerary — ${err.message}`);
   }
 });
 
-// ---------- helpers ----------------------------------------------
-function showEmpty() {
-  output.innerHTML = "<p>Sorry, no itinerary was returned.</p>";
-  output.hidden    = false;
-}
+// ----------- “View Airport Map” button → /airports -----------------
+document
+  .getElementById("show-airport")
+  ?.addEventListener("click", () => {
+    window.location.href = "/airports";
+  });
 
-// manual “Save” button (kept for legacy workflow)
-save?.addEventListener("click", () => {
-  const txt = localStorage.getItem("itineraryText");
-  if (txt) {
-    localStorage.setItem("itineraryData", txt);   // legacy key
-    alert("Itinerary saved!");
-  }
-});
+// ----------- “Visualize Flight Path” button — future -----------------
+document
+  .getElementById("show-flight")
+  ?.addEventListener("click", () => {
+    alert("Coming soon: Flight path visualization!");
+  });

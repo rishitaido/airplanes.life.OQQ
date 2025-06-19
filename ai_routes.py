@@ -1,20 +1,26 @@
 """
-ai_routes.py — OpenRouter AI Assistant (DeepSeek-R1 Qwen3-8B Free)
+ai_routes.py — OpenRouter AI Assistant
 ===================================================================
-• POST /api/ask        – general assistant (returns plain reply)
-• POST /api/itinerary  – same logic, different UI use
+• POST /api/ask        – general assistant (normal reply)
+• POST /api/itinerary  – day-by-day trip JSON for map UI
 """
 
 from flask import Blueprint, request, jsonify
 from dotenv import load_dotenv
 import os, requests, functools
+
+# ─────────────── Constants ───────────────
+MAX_PROMPT_LEN = 1_000
+REQUEST_TIMEOUT = 90        # seconds
+
 from cache import init_cache_db, get_cached_response, save_response_to_cache
 from limiter_config import limiter
+
 # ─────────────── Environment & Config ───────────────
 load_dotenv(override=True)
 
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "")
-MODEL = "deepseek/deepseek-r1-0528-qwen3-8b:free"
+MODEL = "deepseek/deepseek-r1-0528:free"   # you can swap this to gpt-4o, mistral etc
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 HEADERS = {
     "Authorization": f"Bearer {OPENROUTER_API_KEY}",
@@ -28,21 +34,26 @@ init_cache_db()
 # ─────────────── System Prompt (AI Personality) ───────────────
 SYSTEM_INSTR = """
 You are TripMate, an upbeat, helpful AI assistant for airplanes.life.
-Generate natural, human-readable answers. For itinerary requests, respond with a day-by-day plan in plain text and make sure each day is in the output.
-Example:
-Day 1:
-- Breakfast at Roscioli
-- Visit Colosseum
-- Pasta lunch at Trattoria al Moro
-...etc.
+
+If the user asks for an itinerary, provide a day-by-day plan in JSON array format:
+
+[
+  { "day": 1, "morning": "...", "afternoon": "...", "evening": "..." },
+  { "day": 2, "morning": "...", "afternoon": "...", "evening": "..." },
+  ...
+]
+
+If the user asks a general question (airport lounge, travel tips, airlines), reply in plain text.
+
+Do not use Markdown. Do not use headings, bold, italics, or emoji unless the user explicitly asks for formatted output.
+
+Be helpful, clear, and concise. Your tone should be friendly and professional.
 """
+
 
 # ─────────────── AI Completion Function ───────────────
 def call_openrouter(prompt: str, *, max_tokens: int = 1200) -> str:
-    """
-    Sends prompt to OpenRouter API and returns the AI's reply text.
-    Raises exception on error.
-    """
+    """ Sends prompt to OpenRouter API and returns the AI's reply text. """
     payload = {
         "model": MODEL,
         "messages": [
@@ -52,8 +63,9 @@ def call_openrouter(prompt: str, *, max_tokens: int = 1200) -> str:
         "max_tokens": max_tokens,
         "temperature": 0.7
     }
-
-    r = requests.post(OPENROUTER_URL, headers=HEADERS, json=payload, timeout=90)
+    if not OPENROUTER_API_KEY:
+        raise RuntimeError("OPENROUTER_API_KEY is missing.")
+    r = requests.post(OPENROUTER_URL, headers=HEADERS, json=payload, timeout=REQUEST_TIMEOUT)
     if r.status_code == 401:
         raise RuntimeError("Invalid OpenRouter API key.")
     if r.status_code == 402:
@@ -64,46 +76,68 @@ def call_openrouter(prompt: str, *, max_tokens: int = 1200) -> str:
     return data["choices"][0]["message"]["content"].strip()
 
 # ─────────────── Decorator for Reusable AI Routes ───────────────
-def ai_endpoint(force_3_days=False):
+def ai_endpoint(default_days: int | None = None):
     """
-    Shared wrapper for API endpoints that call the AI.
-    Supports optional 3-day itinerary formatting override.
+    Shared wrapper for AI routes.
+    - If default_days is set → force itinerary JSON
+    - If None → normal chat
     """
     def decorator(fn):
         @functools.wraps(fn)
         def wrapper():
             data = request.get_json(force=True, silent=True) or {}
-            prompt = (data.get("prompt") or "").strip()
 
-            # 🔒 Reject empty or excessively long prompts
+            # Support "prompt" being string or dict
+            prompt_data = data.get("prompt")
+            if isinstance(prompt_data, dict):
+                city = prompt_data.get("city", "").strip()
+                days_field = prompt_data.get("days", "")
+                theme = prompt_data.get("theme", "").strip()
+                prompt = f"Plan a trip to {city}, {days_field} days, focused on {theme}."
+            else:
+                prompt = (prompt_data or "").strip()
+
+            # Reject empty / too long
             if not prompt:
                 return jsonify({"error": "Prompt is required"}), 400
-            if len(prompt) > 1000:
-                return jsonify({"error": "Prompt too long (max 1000 characters)"}), 413
+            if len(prompt) > MAX_PROMPT_LEN:
+                return jsonify({"error": f'Prompt too long (max {MAX_PROMPT_LEN} chars)'}), 413
 
-            # ✈️ Enforce 3-day formatting if this is an itinerary endpoint
-            if force_3_days: 
+            # Optional itinerary formatting
+            req_days = data.get("days")
+            try:
+                req_days = int(req_days) if req_days else None
+            except ValueError:
+                req_days = None
+
+            days = req_days or default_days
+            if days:
                 prompt += (
-                  "\n\nPlease respond with a complete 3-day itinerary for this trip, using the format:\n"
-                  "Day 1:\n- Morning:\n- Afternoon:\n- Evening:\n\n"
-                  "Day 2:\n- Morning:\n- Afternoon:\n- Evening:\n\n"
-                  "Day 3:\n- Morning:\n- Afternoon:\n- Evening:\n\n"
-                  "Be concise but clear. Use plain text only."
+                    f"\n\nPlease return a {days}-day itinerary in this exact JSON array format:\n\n"
+                    "[\n"
+                    "  { \"day\": 1, \"morning\": \"...\", \"afternoon\": \"...\", \"evening\": \"...\" },\n"
+                    "  { \"day\": 2, \"morning\": \"...\", \"afternoon\": \"...\", \"evening\": \"...\" },\n"
+                    "  ...\n"
+                    "]\n\n"
+                    "Return ONLY the JSON array. No extra text, no explanations."
                 )
 
-            # 💾 Return cached response if available
+            # Check cache
             if cached := get_cached_response(prompt):
                 return jsonify({"reply": cached})
 
-            # 🚀 Call AI and handle errors gracefully
+            # Call AI
             try:
-                reply = call_openrouter(prompt)
+                dynamic_max = 400 + (days or 0) * 180
+                dynamic_max = min(dynamic_max, 2048)
+                reply = call_openrouter(prompt, max_tokens=dynamic_max)
                 if not reply:
                     raise RuntimeError("Empty response from AI")
+            except requests.Timeout:
+                reply = "[ERROR] AI request timed out"
             except Exception as e:
                 reply = f"[ERROR] {e}"
 
-            # 💽 Cache response for future reuse
             save_response_to_cache(prompt, reply)
             return jsonify({"reply": reply})
 
@@ -113,14 +147,14 @@ def ai_endpoint(force_3_days=False):
 # ─────────────── Routes ───────────────
 @ai_routes.route("/api/ask", methods=["POST"])
 @limiter.limit("5 per minute")
-@ai_endpoint()
+@ai_endpoint(default_days=None)   # ✅ FIXED: pure chat — no forced JSON
 def api_ask():
-    """Handles general-purpose AI questions from chat UI."""
+    """ General-purpose chat from AI. """
     pass
 
 @ai_routes.route("/api/itinerary", methods=["POST"])
 @limiter.limit("4 per minute")
-@ai_endpoint(force_3_days=True)
+@ai_endpoint(default_days=3)      # ✅ For itinerary/map UI — returns JSON
 def api_itinerary():
-    """Handles AI-generated 3-day itineraries for map UI."""
+    """ AI-generated 3-day itineraries for map UI. """
     pass

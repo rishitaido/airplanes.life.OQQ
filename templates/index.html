@@ -3,93 +3,101 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>airplanes.life – AI Travel Concierge</title>
+  <title>airplanes.life – Personalised AI Travel Concierge</title>
 
-  <!-- Styles -->
+  <!-- Fonts + Styles -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
 </head>
 
 <body>
-  <header>
-    <h1>airplanes.life ✈️</h1>
-    <nav class="header-ctas">
-      <a class="cta-secondary" href="{{ url_for('model') }}">View 3-D Aircraft ▶</a>
-      <a class="cta-secondary" href="{{ url_for('itinerary') }}">View 3-D Itinerary Map</a>
-  </nav>
-  </header>
 
-  <main class="layout-narrow">
-    <p id="greeting" class="fade-in greeting-clear">Loading …</p>
+  <!-- HERO SECTION — DO NOT CHANGE (you already have this) -->
+  <section class="hero">
+    <div class="hero-content">
 
-    <!-- ✦ Intro Banner (dismissible) -->
-    <section id="site-intro" class="intro-banner" role="region" aria-label="Site introduction">
+      <header>
+        <h1>Airplanes.life </h1>
+        <nav class="header-ctas">
+          <a class="cta-secondary" href="{{ url_for('model') }}">3-D Aircraft</a>
+          <a class="cta-secondary" href="{{ url_for('itinerary') }}">Itinerary Map</a>
+          <a class="cta-secondary" href="{{ url_for('airports') }}">Explore Globe</a>
+        </nav>
+      </header>
+
+      <div class="hero-text">
+        <h2>Personalised AI Travel Concierge</h2>
+        <p>More flexibility, freedom and choice to plan your perfect journey.</p>
+        <a class="cta-primary" href="#travel-tools">Start Planning</a>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- PAGE BACKGROUND — BEHIND ALL BELOW -->
+  <section class="page-bg">
+
+    <!-- WELCOME BANNER -->
+    <section id="site-intro" class="intro-banner fade-in layout-narrow" role="region" aria-label="Site introduction">
       <p>
         <strong>Welcome to airplanes.life!</strong><br>
-        I’m your AI travel concierge—ask me anything from
+        I’m your AI travel concierge — ask me anything from
         “Find hidden-gem ramen near Shibuya” to
         “Visualise my JFK → HND flight path” and I’ll sort it out.
       </p>
-      <button id="intro-close" aria-label="Close introduction">&times;</button>
+      <button id="intro-close" aria-label="Dismiss welcome banner">&times;</button>
     </section>
 
-    
-    <section id="ai-chat" aria-label="Chat with AI">
-      <h2 class="visually-hidden">AI Chat</h2>
+    <!-- FEATURE CARDS -->
+    <section class="features-grid layout-narrow fade-in">
+      <article class="feature-card">
+        <h3>AI Chat Concierge</h3>
+        <p>Plan trips, discover new routes, and get personalised tips — just by chatting with our AI.</p>
+      </article>
+      <article class="feature-card">
+        <h3>3-D Aircraft Explorer</h3>
+        <p>View your aircraft in full 3D — rotate, zoom, and explore interior and exterior features.</p>
+      </article>
+      <article class="feature-card">
+        <h3>Interactive Itineraries</h3>
+        <p>Generate day-by-day itineraries and visualise them on interactive maps and globes.</p>
+      </article>
+    </section>
 
+    <!-- AI CHAT BOX -->
+    <section id="ai-chat" aria-label="Chat with AI" class="fade-in layout-narrow card">
+      <h2 class="section-heading">AI Chat</h2>
       <div id="chat-container" role="log" aria-live="polite"></div>
-
-      <div class="chat-footer">
-        <form id="input-area" autocomplete="off">
-          <label for="chat-input" class="visually-hidden">Type your message</label>
-          <input type="text" id="chat-input" placeholder="Ask me about your trip..." required />
-          <button id="send-button" type="submit" aria-label="Send message">Send</button>
-        </form>
-      </div>
+      <form id="input-area" class="chat-footer" autocomplete="off">
+        <label for="chat-input" class="visually-hidden">Type your message</label>
+        <input type="text" id="chat-input" placeholder="Ask me about your trip…" required />
+        <button id="send-button" type="submit" aria-label="Send message">Send</button>
+      </form>
     </section>
 
-    <!-- 🧭 Travel Tools Section -->
-    <section id="travel-tools" aria-label="Travel Tools">
-
+    <!-- TRAVEL TOOLS BOX -->
+    <section id="travel-tools" class="fade-in layout-narrow card">
       <h2 class="section-heading">Travel Tools</h2>
       <div class="tool-buttons">
         <button id="quick-itinerary">🗺 Generate Tokyo Food Trip</button>
-        <button id="show-airport">🏟 View JFK Airport Map</button>
-        <button id="show-flight">✈️ Visualize My Flight Path</button>
-
+        <button id="show-airport">🏟 View Airport Map</button>
+        <button id="show-flight">✈️ Visualise My Flight Path</button>
       </div>
     </section>
 
-  </main>
+  </section>
 
-  <!-- Set Greeting Text -->
+  <!-- SCRIPTS -->
   <script>
-    window.addEventListener('DOMContentLoaded', () =>
-      document.getElementById('greeting').textContent =
-        'Hello 👋 – ready to explore your next adventure?');
+    window.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('intro-close')?.addEventListener('click', () => {
+        document.getElementById('site-intro').style.display = 'none';
+      });
+    });
   </script>
 
-  <!-- Client-side logic -->
   <script type="module" src="{{ url_for('static', filename='chat.js') }}"></script>
   <script type="module" src="{{ url_for('static', filename='travel-tools.js') }}"></script>
-  
-  <script>
-    /* Intro banner dismiss */
-    document.getElementById('intro-close')?.addEventListener('click', () => {
-      document.getElementById('site-intro').style.display = 'none';
-    });
 
-    /* Floating chat toggle 
-    const launcher = document.getElementById('chat-launcher');
-    const chatBox  = document.getElementById('ai-chat');
-
-    launcher.addEventListener('click', () => {
-      const isOpen = chatBox.classList.toggle('open');
-      launcher.setAttribute('aria-expanded', isOpen);
-    }); */
-    
-
-  </script>
 </body>
 </html>
-
-

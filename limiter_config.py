@@ -1,20 +1,18 @@
 # limiter_config.py
+# =========================================================
+# Flask-Limiter config with Redis backend
+# Uses per-IP limiting (can switch to per-user later)
+# =========================================================
+
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
-from limits.storage import RedisStorage
-from redis import Redis
 
-# Define Redis storage URL
+# Redis URL — adjust if needed (Docker, prod, etc)
 redis_url = "redis://localhost:6379"
 
-# Create a RedisStorage instance
-redis_storage = RedisStorage(redis_url)
-
-# Create a Limiter WITHOUT attaching it yet
+# Create Limiter instance with Redis backend
 limiter = Limiter(
     key_func=get_remote_address,
-    default_limits=["20 per minute"]
+    default_limits=["20 per minute"],
+    storage_uri=redis_url
 )
-
-# Save the storage to apply later in app.py
-limiter._storage = redis_storage  # Hacky but effective until .init_app()
