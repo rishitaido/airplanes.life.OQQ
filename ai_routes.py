@@ -20,7 +20,7 @@ from limiter_config import limiter
 load_dotenv(override=True)
 
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "")
-MODEL = "deepseek/deepseek-r1-0528:free"   # you can swap this to gpt-4o, mistral etc
+MODEL = "mistralai/devstral-small-2505:free"   # you can swap this to gpt-4o, mistral etc
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 HEADERS = {
     "Authorization": f"Bearer {OPENROUTER_API_KEY}",
@@ -115,12 +115,14 @@ def ai_endpoint(default_days: int | None = None):
                 prompt += (
                     f"\n\nPlease return a {days}-day itinerary in this exact JSON array format:\n\n"
                     "[\n"
-                    "  { \"day\": 1, \"morning\": \"...\", \"afternoon\": \"...\", \"evening\": \"...\" },\n"
-                    "  { \"day\": 2, \"morning\": \"...\", \"afternoon\": \"...\", \"evening\": \"...\" },\n"
+                    "  { \"day\": 1, \"morning\": \"In 2–3 sentences, describe the morning with times, locations, and experiences.\",\n"
+                    "    \"afternoon\": \"In 2–3 sentences, describe afternoon activities with pacing and local details.\",\n"
+                    "    \"evening\": \"In 2–3 sentences, describe evening experiences, with times, food, culture.\" },\n"
                     "  ...\n"
                     "]\n\n"
-                    "Return ONLY the JSON array. No extra text, no explanations."
+                    "Make each day feel full and realistic — include times, places, and descriptions. Return ONLY the JSON array. Do not include any extra text."
                 )
+
 
             # Check cache
             if cached := get_cached_response(prompt):
