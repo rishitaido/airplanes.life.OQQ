@@ -22,7 +22,7 @@ body {
 .hero {
   position: relative;
   min-height: 100vh;
-  background: url('/static/assets/FlightLanding.jpg') center/cover no-repeat;
+  background: url('/static/assets/images/FlightLanding.jpg') center/cover no-repeat;
   color: #fff;
   display: flex;
   align-items: center;
@@ -79,7 +79,7 @@ body {
 }
 
 .page-bg-itinerary {
-  background: url('/static/assets/Overview2.jpg') center/cover no-repeat fixed;
+  background: url('/static/assets/images/Overview2.jpg') center/cover no-repeat fixed;
   padding: 4rem 0;
   min-height: 100vh;
   position: relative;
@@ -136,7 +136,7 @@ body {
 
 /* Page background behind cards */
 .page-bg {
-  background: url('/static/assets/Overview.jpg') center/cover no-repeat fixed;
+  background: url('/static/assets/images/Overview.jpg') center/cover no-repeat fixed;
   padding: 4rem 0;
 }
 
@@ -199,6 +199,7 @@ body {
 }
 
 #input-area {
+  padding: 1rem;
   display: flex;
   gap: .75rem;
 }
@@ -318,3 +319,191 @@ body {
   background: #333;
 }
 
+.page-destinations {
+  background: linear-gradient(120deg, #1a2a6c, #020101, #42083a);
+  background-size: cover;
+  color: rgba(255, 255, 255, 0.95);
+  padding-top: 3rem;
+}
+
+.page-destinations .dest-stack {
+  position: relative;
+  height: 600px;
+  width: 100%;
+}
+
+.page-destinations .stack-card {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%) translateY(0) scale(1);
+  width: 360px;
+  max-width: 95%;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 1rem;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  transition: transform 0.5s ease, opacity 0.5s ease;
+}
+
+.page-destinations .stack-card.active {
+  z-index: 10;
+  opacity: 1;
+  transform: translateX(-50%) translateY(0) scale(1);
+}
+
+.page-destinations .stack-card.behind-1 {
+  z-index: 9;
+  opacity: 0.8;
+  transform: translateX(calc(-50% - 15px)) translateY(5px) scale(0.97);
+}
+
+.page-destinations .stack-card.behind-2 {
+  z-index: 8;
+  opacity: 0.6;
+  transform: translateX(calc(-50% - 30px)) translateY(10px) scale(0.94);
+}
+
+.page-destinations .stack-card.behind-3 {
+  z-index: 7;
+  opacity: 0.4;
+  transform: translateX(calc(-50% - 45px)) translateY(15px) scale(0.91);
+}
+
+.page-destinations .stack-card.hidden {
+  z-index: 0;
+  opacity: 0;
+  transform: translateX(calc(-50% - 60px)) translateY(20px) scale(0.9);
+}
+
+.page-destinations .stack-card h3 {
+  margin: 0;
+  font-size: 1.4rem;
+}
+
+.page-destinations .slider {
+  position: relative;
+  width: 100%;
+  height: 240px;
+  overflow: hidden;
+  border-radius: 0.8rem;
+}
+
+.page-destinations .slider img {
+  width: 100%;
+  height: 240px;
+  object-fit: cover;
+  border-radius: 0.8rem;
+}
+
+.page-destinations .slider button {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0, 0, 0, 0.4);
+  color: white;
+  border: none;
+  font-size: 1.2rem;
+  padding: 0.3rem 0.6rem;
+  cursor: pointer;
+  border-radius: 50%;
+}
+
+.page-destinations .slider-prev { left: 0.5rem; }
+.page-destinations .slider-next { right: 0.5rem; }
+
+#next-dest {
+  margin-top: 2rem;
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+  border-radius: 999px;
+  background: #000;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  transition: background .2s ease;
+}
+
+#next-dest:hover {
+  background: #333;
+}
+
+/* === Map Explorer Page Styles === */
+.page-map {
+  background: #f2f4f8;
+  color: #2e2f36;
+}
+
+.page-map #map {
+  width: 100%;
+  height: 100vh;
+  position: relative;
+  z-index: 1;
+}
+
+/* Sticky Top Bar */
+.page-map .ui-bar {
+  position: absolute;
+  top: 80px; /* below header */
+  left: 1rem;
+  right: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(6px);
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 999;
+}
+
+.page-map .ui-bar .btn {
+  padding: 0.5rem 1.2rem;
+  border-radius: 999px;
+  background: #000;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 600;
+  transition: background 0.2s ease;
+}
+
+.page-map .ui-bar .btn:hover {
+  background: #333;
+}
+
+/* Search box */
+.page-map #globe-search {
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  border: 1px solid #ccc;
+  flex: 1 1 220px;
+  min-width: 180px;
+  font-size: 0.95rem;
+}
+
+/* Responsive (Mobile) */
+@media (max-width: 700px) {
+  .page-map .ui-bar {
+    top: 70px;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1rem;
+  }
+
+  .page-map .ui-bar .btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  .page-map #globe-search {
+    width: 100%;
+  }
+}

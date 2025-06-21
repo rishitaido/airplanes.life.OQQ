@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Destination Finder – airplanes.life</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="page-destinations">
+  <header>
+    <h1>🌍 Destination Finder</h1>
+    <nav class="header-ctas">
+      <a class="cta-secondary btn-dark" href="{{ url_for('index') }}">← Back to Home</a>
+    </nav>
+  </header>
+
+  <main class="layout-wide">
+    <p>Discover new destinations — one at a time!</p>
+
+    <section class="dest-stack" id="dest-stack"></section>
+
+    <div style="text-align:center; margin-top: 2rem;">
+      <button id="next-dest" class="cta-primary">Next Destination →</button>
+    </div>
+  </main>
+
+  <script type="module">
+    async function loadDestinations() {
+      const res = await fetch("/static/destinations.json");
+      const data = await res.json();
+
+      const stack = document.getElementById("dest-stack");
+
+      // Shuffle destinations
+      const shuffled = data.sort(() => Math.random() - 0.5);
+      let currentIndex = 0;
+
+      function renderStack() {
+        stack.innerHTML = "";
+        shuffled.forEach((dest, i) => {
+          const card = document.createElement("div");
+          card.className = "dest-card stack-card";
+
+          if (i === currentIndex) {
+            card.classList.add("active");
+          } else if (i === currentIndex + 1) {
+            card.classList.add("behind-1");
+          } else if (i === currentIndex + 2) {
+            card.classList.add("behind-2");
+          } else if (i === currentIndex + 3) {
+            card.classList.add("behind-3");
+          } else {
+            card.classList.add("hidden");
+          }
+
+          const images = dest.images.map(img => `/static/assets/images/${img}`);
+          let imgIndex = 0;
+
+          card.innerHTML = `
+            <div class="slider">
+              <img src="${images[imgIndex]}" alt="${dest.name}" class="slider-img">
+              <button class="slider-prev">←</button>
+              <button class="slider-next">→</button>
+            </div>
+            <h3>${dest.name}</h3>
+            <p>${dest.tagline}</p>
+            <p><strong>Fun Fact:</strong> ${dest.fun_fact}</p>
+            <p><strong>Best time to visit:</strong> ${dest.best_time}</p>
+            <button class="cta-secondary btn-dark" onclick="planTrip('${dest.name}')">Plan My Trip →</button>
+          `;
+
+          stack.appendChild(card);
+
+          // Slider logic
+          const imgEl = card.querySelector(".slider-img");
+          const prevBtn = card.querySelector(".slider-prev");
+          const nextBtn = card.querySelector(".slider-next");
+
+          prevBtn.addEventListener("click", () => {
+            imgIndex = (imgIndex - 1 + images.length) % images.length;
+            imgEl.src = images[imgIndex];
+          });
+
+          nextBtn.addEventListener("click", () => {
+            imgIndex = (imgIndex + 1) % images.length;
+            imgEl.src = images[imgIndex];
+          });
+        });
+      }
+
+      document.getElementById("next-dest").addEventListener("click", () => {
+        currentIndex = (currentIndex + 1) % shuffled.length;
+        renderStack();
+      });
+
+      renderStack();
+    }
+
+    async function planTrip(place) {
+      const res = await fetch("/api/itinerary", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          prompt: `Plan a 3-day trip to ${place} with food, culture, and local experiences.`,
+          days: 3
+        })
+      });
+      const data = await res.json();
+      localStorage.setItem("itineraryText", data.reply);
+      window.location.href = "/itinerary";
+    }
+
+    loadDestinations();
+  </script>
+</body>
+</html>

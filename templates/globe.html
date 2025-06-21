@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Airport Explorer (MapLibre v5)</title>
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+  <script src='https://unpkg.com/maplibre-gl@5.6.0/dist/maplibre-gl.js'></script>
+  <link rel='stylesheet' href='https://unpkg.com/maplibre-gl@5.6.0/dist/maplibre-gl.css' />
+
+  <script>
+    window.MAPTILER_KEY = "{{ maptiler_key }}";
+  </script>
+
+  <script type="module" src="{{ url_for('static', filename='maplibre.js') }}"></script>
+</head>
+
+<body class="page-map">
+  <header class="subheader">
+    <a class="cta-secondary" href="{{ url_for('index') }}">← Back to Home</a>
+  </header>
+
+  <!-- Map -->
+  <div id="map" style="width: 100%; height: calc(100vh - 80px);"></div>
+
+  <!-- Toolbar -->
+  <div class="ui-bar">
+    <a href="{{ url_for('index') }}" class="btn back">⟵ Home</a>
+    <button id="toggle-view" class="btn">Switch to Flat Map 🗺</button>
+    <button id="toggle-airports" class="btn">Hide Airports</button>
+    <button id="toggle-restaurants" class="btn">Show Restaurants 🍽</button>
+    <button id="toggle-attractions" class="btn">Show Attractions 🎡</button>
+    <input id="globe-search" placeholder="Search IATA / city" />
+  </div>
+</body>
+</html>

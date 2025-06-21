@@ -1,0 +1,72 @@
+[
+  {
+    "name": "Kyoto, Japan",
+    "tagline": "City of 1000 temples and stunning gardens.",
+    "fun_fact": "Kyoto was Japan’s capital for over 1,000 years.",
+    "best_time": "Spring (March–May) for cherry blossoms.",
+    "images": ["japan/Japan1.jpg", "japan/Japan2.jpg", "japan/Japan3.jpg"]
+  },
+  {
+    "name": "New York City, USA",
+    "tagline": "The city that never sleeps.",
+    "fun_fact": "NYC has over 800 languages spoken, making it the most linguistically diverse city in the world.",
+    "best_time": "April–June or September–November.",
+    "images": ["nyc/NYC1.jpg", "nyc/NYC2.jpg", "nyc/NYC3.jpg"]
+  },
+  {
+    "name": "Paris, France",
+    "tagline": "City of light and romance.",
+    "fun_fact": "There are over 130 museums in Paris.",
+    "best_time": "April–June or September–October.",
+    "images": ["france/Paris1.jpg", "france/Paris2.jpg", "france/Paris3.jpg"]
+  },
+  {
+    "name": "Reykjavik, Iceland",
+    "tagline": "Gateway to stunning natural wonders.",
+    "fun_fact": "Nearly all homes in Reykjavik use geothermal energy.",
+    "best_time": "September–March (Northern Lights).",
+    "images": ["iceland/Iceland1.jpg", "iceland/Iceland2.jpg", "iceland/Iceland3.jpg"]
+  },
+  {
+    "name": "Lisbon, Portugal",
+    "tagline": "Colorful streets and historic trams.",
+    "fun_fact": "Lisbon is the second-oldest European capital city.",
+    "best_time": "April to October.",
+    "images": ["portugal/Portugal1.jpg"]
+  },
+  {
+    "name": "Barcelona, Spain",
+    "tagline": "Gaudí’s masterpiece city by the sea.",
+    "fun_fact": "Sagrada Familia has been under construction since 1882.",
+    "best_time": "May–June or September–October.",
+    "images": ["spain/Spain1.jpg"]
+  },
+  {
+    "name": "Venice, Italy",
+    "tagline": "City of canals and romance.",
+    "fun_fact": "Venice has over 400 bridges connecting 118 islands.",
+    "best_time": "April–May or September–October.",
+    "images": ["italy/Italy1.jpg"]
+  },
+  {
+    "name": "Amsterdam, Netherlands",
+    "tagline": "Bikes, canals, and charming streets.",
+    "fun_fact": "There are more bikes than people in Amsterdam.",
+    "best_time": "April–May (tulips) or September–November.",
+    "images": ["netherlands/Netherlands1.jpg"]
+  },
+  {
+    "name": "Singapore",
+    "tagline": "A city of the future.",
+    "fun_fact": "Singapore is one of only three surviving city-states in the world.",
+    "best_time": "February–April.",
+    "images": ["singapore/Singapore1.jpg"]
+  },
+  {
+    "name": "Sydney, Australia",
+    "tagline": "Harbor city with iconic landmarks.",
+    "fun_fact": "The Sydney Opera House roof is made of over one million tiles.",
+    "best_time": "September–November or March–May.",
+    "images": ["australia/Australia1.jpg"]
+  }
+]
