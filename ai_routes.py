@@ -1,91 +1,163 @@
-from flask import Blueprint, request, Response, stream_with_context
+"""
+ai_routes.py — OpenRouter AI Assistant
+===================================================================
+• POST /api/ask        – general assistant (normal reply)
+• POST /api/itinerary  – day-by-day trip JSON for map UI
+"""
+
+from flask import Blueprint, request, jsonify
 from dotenv import load_dotenv
-import os
-import re
-import requests
-import time
+import os, requests, functools
+
+# ─────────────── Constants ───────────────
+MAX_PROMPT_LEN = 1_000
+REQUEST_TIMEOUT = 90        # seconds
+
 from cache import init_cache_db, get_cached_response, save_response_to_cache
+from limiter_config import limiter
 
-# Load environment variables
+# ─────────────── Environment & Config ───────────────
 load_dotenv(override=True)
-HUGGINGFACE_API_KEY = os.getenv("HUGGINGFACE_API_KEY")
 
-# Model configuration
-AI_MODEL = "HuggingFaceH4/zephyr-7b-beta"
-HF_URL = f"https://api-inference.huggingface.co/models/{AI_MODEL}"
-HEADERS = {"Authorization": f"Bearer {HUGGINGFACE_API_KEY}"}
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "")
+MODEL = "mistralai/devstral-small-2505:free"   # you can swap this to gpt-4o, mistral etc
+OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
+HEADERS = {
+    "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+    "Content-Type": "application/json"
+}
 
+# ─────────────── Initialize Flask Blueprint ───────────────
 ai_routes = Blueprint("ai_routes", __name__)
 
 init_cache_db()
 
-@ai_routes.route("/api/ask", methods=["POST"])
-def ask():
-    print("🔍 /api/ask HIT")
-    data = request.get_json() or {}
-    prompt = data.get("prompt", "").strip()
-    print(f"🔍 Prompt: {prompt}")
+# ─────────────── System Prompt (AI Personality) ───────────────
+SYSTEM_INSTR = """
+You are TripMate, an upbeat, helpful AI assistant for airplanes.life.
 
-    # Return cached response if available
-    cached = get_cached_response(prompt)
-    if cached:
-        return Response(cached, mimetype="text/plain")
+If the user asks for an itinerary, provide a day-by-day plan in JSON array format:
 
-    def generate():
-        # simulate thinking delay
-        time.sleep(1)
+[
+  { "day": 1, "morning": "...", "afternoon": "...", "evening": "..." },
+  { "day": 2, "morning": "...", "afternoon": "...", "evening": "..." },
+  ...
+]
 
-        # System instruction: concise factual answers only
-        system_instruction = (
-            "You are a concise, factual assistant. "
-            "Answer the question directly in one short paragraph. "
-            "Do not ask follow-up questions or add extra commentary."
-        )
-        full_input = f"{system_instruction}\nQuestion: {prompt}"   
-        payload = {
-            "inputs": full_input,
-            "parameters": {
-                "max_new_tokens": 300,
-                "temperature": 0.1,
-                "do_sample": False,
-                "return_full_text": False,
-            }
-        }
+If the user asks a general question (airport lounge, travel tips, airlines), reply in plain text.
 
-        try:
-            response = requests.post(HF_URL, headers=HEADERS, json=payload)
-            print("⬅️ HF status:", response.status_code)
-            print("⬅️ HF raw body:", response.text[:500])
+Do not use Markdown. Do not use headings, bold, italics, or emoji unless the user explicitly asks for formatted output.
 
-            if response.status_code != 200:
-                yield f"[ERROR]: {response.status_code} - {response.text}"
-                return
+Be helpful, clear, and concise. Your tone should be friendly and professional.
+"""
 
-            resp_json = response.json()
-            # Extract generated text
-            if isinstance(resp_json, dict) and "generated_text" in resp_json:
-                answer = resp_json["generated_text"].strip()
-            elif isinstance(resp_json, list) and resp_json and "generated_text" in resp_json[0]:
-                answer = resp_json[0]["generated_text"].strip()
+
+# ─────────────── AI Completion Function ───────────────
+def call_openrouter(prompt: str, *, max_tokens: int = 1200) -> str:
+    """ Sends prompt to OpenRouter API and returns the AI's reply text. """
+    payload = {
+        "model": MODEL,
+        "messages": [
+            { "role": "system", "content": SYSTEM_INSTR.strip() },
+            { "role": "user",   "content": prompt.strip() }
+        ],
+        "max_tokens": max_tokens,
+        "temperature": 0.7
+    }
+    if not OPENROUTER_API_KEY:
+        raise RuntimeError("OPENROUTER_API_KEY is missing.")
+    r = requests.post(OPENROUTER_URL, headers=HEADERS, json=payload, timeout=REQUEST_TIMEOUT)
+    if r.status_code == 401:
+        raise RuntimeError("Invalid OpenRouter API key.")
+    if r.status_code == 402:
+        raise RuntimeError("Quota exceeded or model requires payment.")
+    r.raise_for_status()
+
+    data = r.json()
+    return data["choices"][0]["message"]["content"].strip()
+
+# ─────────────── Decorator for Reusable AI Routes ───────────────
+def ai_endpoint(default_days: int | None = None):
+    """
+    Shared wrapper for AI routes.
+    - If default_days is set → force itinerary JSON
+    - If None → normal chat
+    """
+    def decorator(fn):
+        @functools.wraps(fn)
+        def wrapper():
+            data = request.get_json(force=True, silent=True) or {}
+
+            # Support "prompt" being string or dict
+            prompt_data = data.get("prompt")
+            if isinstance(prompt_data, dict):
+                city = prompt_data.get("city", "").strip()
+                days_field = prompt_data.get("days", "")
+                theme = prompt_data.get("theme", "").strip()
+                prompt = f"Plan a trip to {city}, {days_field} days, focused on {theme}."
             else:
-                print("⚠️ Unexpected HF format:", resp_json)
-                yield "[ERROR]: Unexpected response format from HF API"
-                return
+                prompt = (prompt_data or "").strip()
 
-            # Clean control tokens
-            answer = re.sub(r"<\|.*?\|>", "", answer).strip()
-            # Remove echoed prompt prefix
-            if answer.lower().startswith(prompt.lower()):
-                answer = answer[len(prompt):].lstrip(' \n:–—-')
+            # Reject empty / too long
+            if not prompt:
+                return jsonify({"error": "Prompt is required"}), 400
+            if len(prompt) > MAX_PROMPT_LEN:
+                return jsonify({"error": f'Prompt too long (max {MAX_PROMPT_LEN} chars)'}), 413
 
-            print("💡 Final cleaned answer:", answer)
+            # Optional itinerary formatting
+            req_days = data.get("days")
+            try:
+                req_days = int(req_days) if req_days else None
+            except ValueError:
+                req_days = None
 
-            # Cache and stream full detailed answer
-            save_response_to_cache(prompt, answer)
-            yield answer
+            days = req_days or default_days
+            if days:
+                prompt += (
+                    f"\n\nPlease return a {days}-day itinerary in this exact JSON array format:\n\n"
+                    "[\n"
+                    "  { \"day\": 1, \"morning\": \"In 2–3 sentences, describe the morning with times, locations, and experiences.\",\n"
+                    "    \"afternoon\": \"In 2–3 sentences, describe afternoon activities with pacing and local details.\",\n"
+                    "    \"evening\": \"In 2–3 sentences, describe evening experiences, with times, food, culture.\" },\n"
+                    "  ...\n"
+                    "]\n\n"
+                    "Make each day feel full and realistic — include times, places, and descriptions. Return ONLY the JSON array. Do not include any extra text."
+                )
 
-        except Exception as e:
-            print("❌ Exception during HF request:", str(e))
-            yield f"[ERROR]: Exception {e}"
 
-    return Response(stream_with_context(generate()), mimetype="text/plain")
+            # Check cache
+            if cached := get_cached_response(prompt):
+                return jsonify({"reply": cached})
+
+            # Call AI
+            try:
+                dynamic_max = 400 + (days or 0) * 180
+                dynamic_max = min(dynamic_max, 2048)
+                reply = call_openrouter(prompt, max_tokens=dynamic_max)
+                if not reply:
+                    raise RuntimeError("Empty response from AI")
+            except requests.Timeout:
+                reply = "[ERROR] AI request timed out"
+            except Exception as e:
+                reply = f"[ERROR] {e}"
+
+            save_response_to_cache(prompt, reply)
+            return jsonify({"reply": reply})
+
+        return wrapper
+    return decorator
+
+# ─────────────── Routes ───────────────
+@ai_routes.route("/api/ask", methods=["POST"])
+@limiter.limit("5 per minute")
+@ai_endpoint(default_days=None)   # ✅ FIXED: pure chat — no forced JSON
+def api_ask():
+    """ General-purpose chat from AI. """
+    pass
+
+@ai_routes.route("/api/itinerary", methods=["POST"])
+@limiter.limit("4 per minute")
+@ai_endpoint(default_days=3)      # ✅ For itinerary/map UI — returns JSON
+def api_itinerary():
+    """ AI-generated 3-day itineraries for map UI. """
+    pass

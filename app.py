@@ -4,9 +4,13 @@ from flask_swagger_ui import get_swaggerui_blueprint
 import os
 from prometheus_client import Counter, Histogram, generate_latest
 import time 
+from limiter_config import limiter
+
 
 app = Flask(__name__)
+limiter.init_app(app)  # Apply rate limits to this blueprint
 app.register_blueprint(ai_routes)
+
 
 # 1) Define your metrics
 REQUEST_COUNT   = Counter('request_count', 'Total HTTP requests', ['method', 'endpoint'])
@@ -48,14 +52,21 @@ def openapi_spec():
 def index():
     return render_template("index.html", page_title='My AI 3-D Viewer – Chat')
 
-@app.route("/api/hello", methods=["GET"])
-def hello():
-    return jsonify({"msg": "Hello, world!"})
-
 @app.route("/model")
 def model():
     return render_template("model.html")
 
+@app.route("/itinerary")
+def itinerary():
+    return render_template("itinerary.html")
+
+@app.route("/globe")
+def globe():
+    return render_template("globe.html", maptiler_key=os.getenv("MAPTILER_KEY"))
+
+@app.route("/destinations")
+def destinations(): 
+    return render_template("destinations.html")
 
 if __name__ == "__main__":
     app.run(debug=True)

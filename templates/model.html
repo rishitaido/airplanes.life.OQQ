@@ -3,8 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>My AI 3-D Viewer – Model</title>
+  <title>My AI 3-D Viewer</title>
 
+<<<<<<< HEAD
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+=======
   <!-- 1. Bootstrap 5 CSS (latest CDN) -->
   <link
     href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
@@ -17,8 +20,8 @@
   <!-- Global styles -->
   <link rel="stylesheet"
         href="{{ url_for('static', filename='style.css') }}" />
+>>>>>>> main
 
-  <!-- Import-map so ES-modules in webapp.js can resolve Three-JS paths -->
   <script type="importmap">
   {
     "imports": {
@@ -31,6 +34,11 @@
   </script>
 </head>
 
+<<<<<<< HEAD
+<body class="layout-page">
+  <header class="subheader">
+    <a class="cta-secondary" href="{{ url_for('index') }}">← Back to Home</a>
+=======
 <body>
   
   <script
@@ -42,28 +50,24 @@
 
   <header>
     <h1>My&nbsp;AI&nbsp;3-D&nbsp;Viewer</h1>
+>>>>>>> main
   </header>
 
-  <main class="layout-wide">
-    <section id="model-viewer" aria-label="3-D Model Viewer">
-      <h2 class="visually-hidden">3-D Model</h2>
+  <main class="layout-wide fade-in">
+    <h1>My 3-D Viewer</h1>
 
+    <section id="model-viewer" class="card">
       <div id="three-canvas-container"></div>
-      <!-- replace the label/select/back-link block -->
+
       <div class="viewer-controls">
         <label for="model-select">Choose a model:</label>
-        <select id="model-select">
-            
-        </select>
+        <select id="model-select"></select>
 
         <a class="cta-secondary" href="{{ url_for('index') }}">← Back to Chat</a>
-        </div>
-
+      </div>
     </section>
   </main>
 
-  <!-- Main Three-JS / app logic -->
-  <script type="module"
-          src="{{ url_for('static', filename='viewer.js') }}"></script>
+  <script type="module" src="{{ url_for('static', filename='viewer.js') }}"></script>
 </body>
 </html>
