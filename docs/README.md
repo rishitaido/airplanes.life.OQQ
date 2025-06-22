@@ -51,17 +51,16 @@ Docker Compose for orchestration
   pip install -r requirements.txt
 
 # Set environment variables
-  cp .env.example .env
-  # (edit with your keys)
+cp .env.example .env
+(edit with your keys)
 
 # Run the app
-  python app.py
+python app.py
 
 ### 2. Run with Docker Compose
   docker-compose up --build
 
 ### 3. Environment Variables
-  # .env file
   FLASK_ENV=development
   OPENAI_API_KEY=your-key-here
   MAPBOX_API_KEY=your-key-here
