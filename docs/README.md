@@ -22,12 +22,19 @@ AI-powered travel assistant that generates personalized itineraries, interactive
 ---
 
 ## 🛠 Tech Stack
+
 Python (Flask, FastAPI, SQLAlchemy)
+
 AI / ML: scikit-learn, pandas, matplotlib, spotipy
+
 Frontend: vanilla JS, Mapbox GL, HTML/CSS
+
 Monitoring: Prometheus, Grafana
+
 Logging: Loki, Promtail
+
 Docker Compose for orchestration
+
 ---
 
 ## 🚀 Getting Started
