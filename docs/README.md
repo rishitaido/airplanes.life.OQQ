@@ -8,22 +8,26 @@ AI-powered travel assistant that generates personalized itineraries, interactive
 ## 🔥 Features
 
 🤖 AI Chatbot — generate trip plans, get travel recommendations
+
 🗺️ Itinerary Viewer — interactive generated itinerary
+
 🏟️ Airport Maps — view maps of selected airports (Mapbox)
+
 ⚙️ Real-time Monitoring — Prometheus + Grafana dashboards
+
 📜 Log Aggregation — Loki + Promtail for central logs
+
 📱 Responsive Design — mobile-friendly
 
 ---
 
 ## 🛠 Tech Stack
-
-  Python (Flask, FastAPI, SQLAlchemy)
-  AI / ML: scikit-learn, pandas, matplotlib, spotipy
-  Frontend: vanilla JS, Mapbox GL, HTML/CSS
-  Monitoring: Prometheus, Grafana
-  Logging: Loki, Promtail
-  Docker Compose for orchestration
+Python (Flask, FastAPI, SQLAlchemy)
+AI / ML: scikit-learn, pandas, matplotlib, spotipy
+Frontend: vanilla JS, Mapbox GL, HTML/CSS
+Monitoring: Prometheus, Grafana
+Logging: Loki, Promtail
+Docker Compose for orchestration
 ---
 
 ## 🚀 Getting Started
