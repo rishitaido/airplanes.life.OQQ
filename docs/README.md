@@ -41,10 +41,12 @@ Docker Compose for orchestration
 
 # Clone the repo
   git clone https://github.com/yourusername/airplanes.life.git
+  
   cd airplanes.life
 
 # Create virtual env
   python3 -m venv .venv
+  
   source .venv/bin/activate
 
 # Install dependencies
@@ -62,8 +64,11 @@ python app.py
 
 ### 3. Environment Variables
   FLASK_ENV=development
+  
   OPENAI_API_KEY=your-key-here
+  
   MAPBOX_API_KEY=your-key-here
+  
   GRAFANA_PASSWORD=your-password-here
 
 
