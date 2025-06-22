@@ -33,7 +33,6 @@ def metrics():
     return generate_latest(), 200, {'Content-Type': 'text/plain; charset=utf-8'}
 
 
-
 SWAGGER_URL = '/docs'
 API_URL     = '/openapi.yaml'
 
@@ -51,7 +50,7 @@ def openapi_spec():
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    return render_template("index.html", page_title='My AI 3-D Viewer – Chat')
 
 @app.route("/model")
 def model():

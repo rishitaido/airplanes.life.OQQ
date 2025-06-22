@@ -29,6 +29,7 @@ HEADERS = {
 
 # ─────────────── Initialize Flask Blueprint ───────────────
 ai_routes = Blueprint("ai_routes", __name__)
+
 init_cache_db()
 
 # ─────────────── System Prompt (AI Personality) ───────────────

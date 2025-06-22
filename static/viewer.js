@@ -24,10 +24,29 @@ const camera = new THREE.PerspectiveCamera(
 );
 camera.position.set(0, 1.5, 4);
 
+<<<<<<< HEAD
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(canvasWrap.clientWidth, canvasWrap.clientHeight);
 renderer.setPixelRatio(window.devicePixelRatio || 1);
 canvasWrap.appendChild(renderer.domElement);
+=======
+/* ---------- THREE boilerplate ---------- */
+const renderer = new THREE.WebGLRenderer({ 
+  antialias: true,
+  alpha: true
+});
+
+renderer.setSize(width, height);
+renderer.setClearColor(0x000000, 0);
+
+wrap.appendChild(renderer.domElement);
+
+const scene  = new THREE.Scene();
+scene.background = new THREE.Color(0xeeeeee);
+
+const camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 1000);
+camera.position.set(0, 2, 20);
+>>>>>>> main
 
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;

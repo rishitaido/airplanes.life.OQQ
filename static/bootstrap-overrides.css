@@ -1,0 +1,62 @@
+/* ─── Bootstrap Variable Overrides ──────────────────────────────────────────── */
+
+/* 1. Import Bootstrap’s root variables so we only override color-related ones */
+@import url('https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css');
+
+/* 2. Override only the Bootstrap color variables with your dark theme vars */
+:root {
+  /* Base page background & text */
+  --bs-body-bg:           var(--bg);            /* #121212 from styles.css */
+  --bs-body-color:        var(--text);          /* #e0e0e0 */
+
+  /* Primary (used for btn-primary, links, etc.) */
+  --bs-primary:           var(--accent);        /* #00bcd4 */
+  --bs-primary-hover:     var(--accent-dark);   /* #0099ad */
+
+  /* Dark (for .bg-dark, navbar-dark, etc.) */
+  --bs-dark:              #1f1f1f;              /* same as header background */
+
+  /* Card defaults */
+  --bs-card-bg:           var(--bg-elevated);   /* #1e1e1e */
+  --bs-card-border-color: var(--border);        /* #2a2a2a */
+
+  /* Border color for any border-utility or form elements */
+  --bs-border-color:      var(--border);
+
+  /* Secondary colors (just inherit text color or match accent if needed) */
+  --bs-secondary:         var(--text);
+
+  /* Form input backgrounds and text */
+  --bs-form-control-bg:   #242424;              /* same as #chat-input background */
+  --bs-form-control-color: var(--text);
+
+  /* Placeholder color for inputs */
+  --bs-form-control-placeholder-color: #9e9e9e;
+
+  /* Focus ring can stay default or be custom (optional) */
+  --bs-focus-ring-color:  rgba(0, 188, 212, 0.25);
+
+  /* Scrollbar, link, and other utility overrides can be added here if needed */
+}
+
+/* 3. Define a “btn-accent” utility so you can use <button class="btn btn-accent"> */
+.btn-accent {
+  background-color: var(--accent);
+  color: #000;
+  border-radius: var(--radius);
+  transition: background 0.2s ease;
+}
+.btn-accent:hover,
+.btn-accent:focus {
+  background-color: var(--accent-dark);
+}
+
+/* 4. Optional: Override Bootstrap’s .bg-dark class to exactly match #1f1f1f */
+.bg-dark {
+  background-color: #1f1f1f !important;
+}
+
+/* 5. If you want Bootstrap’s .text-light to use your var(--text) */
+.text-light {
+  color: var(--text) !important;
+}
