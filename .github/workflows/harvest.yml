@@ -18,8 +18,8 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Install trimesh system deps
-        run: sudo apt-get update && sudo apt-get install -y libgl1-mesa-glx
-
+        run: sudo apt-get update && sudo apt-get install -y libgl1
+  
       - name: Download gltfpack
         run: |
           wget -q https://github.com/zeux/meshoptimizer/releases/latest/download/gltfpack-linux-x64 \
