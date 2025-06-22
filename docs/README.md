@@ -39,7 +39,6 @@ Docker Compose for orchestration
 
 ## 🚀 Getting Started
 
-### 1. Clone the Repository
 # Clone the repo
   git clone https://github.com/yourusername/airplanes.life.git
   cd airplanes.life
