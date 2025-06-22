@@ -1,44 +1,66 @@
 [![Contribute](https://img.shields.io/badge/Contribute-Here-blue)](CONTRIBUTING.md)
 [![Code of Conduct](https://img.shields.io/badge/CoC-Important-red)](CODE_OF_CONDUCT.md)
 
-# AI + 3D Model Viewer 🌐🤖🧊
+#Airplanes.life — AI Travel Concierge
 
-This project is an interactive web application that integrates AI chat with 3D model visualization using Flask (Python), HTML/CSS, and JavaScript with Three.js.
+AI-powered travel assistant that generates personalized itineraries, interactive maps, and 3D visualizations — all served through a Flask-based web app with modern monitoring and logging.
 
 ## 🔥 Features
 
-- 💬 **AI Chatbot**: Ask questions or chat with an integrated AI model (via Flask API).
-- 🧊 **3D Model Viewer**: Load `.glb` or `.gltf` 3D models dynamically from a JSON configuration.
-- 📁 **Modular Flask App**: Clean project structure with Blueprints for scalable development.
-- 🌐 **Responsive UI**: Styled with CSS custom variables and mobile-friendly layout.
-- 🎨 **Dark Theme**: A sleek, dark-themed user interface using modern CSS.
+🤖 AI Chatbot — generate trip plans, get travel recommendations
+🗺️ Itinerary Viewer — interactive generated itinerary
+🏟️ Airport Maps — view maps of selected airports (Mapbox)
+⚙️ Real-time Monitoring — Prometheus + Grafana dashboards
+📜 Log Aggregation — Loki + Promtail for central logs
+📱 Responsive Design — mobile-friendly
 
 ---
 
 ## 🛠 Tech Stack
 
-- **Backend**: Python 3.10+, Flask
-- **Frontend**: HTML, CSS, JavaScript
-- **3D Rendering**: [Three.js](https://threejs.org/)
-- **AI Integration**: Third-party LLM endpoints (OpenRouter)
-
+  Python (Flask, FastAPI, SQLAlchemy)
+  AI / ML: scikit-learn, pandas, matplotlib, spotipy
+  Frontend: vanilla JS, Mapbox GL, HTML/CSS
+  Monitoring: Prometheus, Grafana
+  Logging: Loki, Promtail
+  Docker Compose for orchestration
 ---
 
 ## 🚀 Getting Started
 
 ### 1. Clone the Repository
+# Clone the repo
+  git clone https://github.com/yourusername/airplanes.life.git
+  cd airplanes.life
 
-```bash
-git clone https://github.com/yourusername/ai-3d-viewer.git
-cd ai-3d-viewer
+# Create virtual env
+  python3 -m venv .venv
+  source .venv/bin/activate
 
-python3 -m venv venv
-source venv/bin/activate  # or `venv\Scripts\activate` on Windows
+# Install dependencies
+  pip install -r requirements.txt
 
-pip install -r requirements.txt
+# Set environment variables
+  cp .env.example .env
+  # (edit with your keys)
 
-export FLASK_APP=app
-export FLASK_ENV=development
-flask run
+# Run the app
+  python app.py
+
+### 2. Run with Docker Compose
+  docker-compose up --build
+
+### 3. Environment Variables
+  # .env file
+  FLASK_ENV=development
+  OPENAI_API_KEY=your-key-here
+  MAPBOX_API_KEY=your-key-here
+  GRAFANA_PASSWORD=your-password-here
+
+
+
+
+ 
+
 
 
