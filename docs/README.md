@@ -8,53 +8,67 @@ AI-powered travel assistant that generates personalized itineraries, interactive
 ## 🔥 Features
 
 🤖 AI Chatbot — generate trip plans, get travel recommendations
+
 🗺️ Itinerary Viewer — interactive generated itinerary
+
 🏟️ Airport Maps — view maps of selected airports (Mapbox)
+
 ⚙️ Real-time Monitoring — Prometheus + Grafana dashboards
+
 📜 Log Aggregation — Loki + Promtail for central logs
+
 📱 Responsive Design — mobile-friendly
 
 ---
 
 ## 🛠 Tech Stack
 
-  Python (Flask, FastAPI, SQLAlchemy)
-  AI / ML: scikit-learn, pandas, matplotlib, spotipy
-  Frontend: vanilla JS, Mapbox GL, HTML/CSS
-  Monitoring: Prometheus, Grafana
-  Logging: Loki, Promtail
-  Docker Compose for orchestration
+Python (Flask, FastAPI, SQLAlchemy)
+
+AI / ML: scikit-learn, pandas, matplotlib, spotipy
+
+Frontend: vanilla JS, Mapbox GL, HTML/CSS
+
+Monitoring: Prometheus, Grafana
+
+Logging: Loki, Promtail
+
+Docker Compose for orchestration
+
 ---
 
 ## 🚀 Getting Started
 
-### 1. Clone the Repository
 # Clone the repo
   git clone https://github.com/yourusername/airplanes.life.git
+  
   cd airplanes.life
 
 # Create virtual env
   python3 -m venv .venv
+  
   source .venv/bin/activate
 
 # Install dependencies
   pip install -r requirements.txt
 
 # Set environment variables
-  cp .env.example .env
-  # (edit with your keys)
+cp .env.example .env
+(edit with your keys)
 
 # Run the app
-  python app.py
+python app.py
 
 ### 2. Run with Docker Compose
   docker-compose up --build
 
 ### 3. Environment Variables
-  # .env file
   FLASK_ENV=development
+  
   OPENAI_API_KEY=your-key-here
+  
   MAPBOX_API_KEY=your-key-here
+  
   GRAFANA_PASSWORD=your-password-here
 
 
