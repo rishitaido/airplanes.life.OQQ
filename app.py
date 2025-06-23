@@ -40,7 +40,7 @@ API_URL     = '/openapi.yaml'
 swaggerui_bp = get_swaggerui_blueprint(
     SWAGGER_URL,
     API_URL,
-    config={ 'app_name': "My AI 3D Viewer API" }
+    config={ 'app_name': "My Personalised AI Travel Concierge" }
 )
 app.register_blueprint(swaggerui_bp, url_prefix=SWAGGER_URL)
 
@@ -51,11 +51,11 @@ def openapi_spec():
 
 @app.route("/")
 def index():
-    return render_template("index.html", page_title='My AI 3-D Viewer – Chat')
+    return render_template("TravelHome.html", page_title='My Personalised AI Travel Concierge')
 
 @app.route("/model")
 def model():
-    return render_template("model.html")
+    return render_template("TravelModel.html")
 
 @app.route("/itinerary")
 def itinerary():
