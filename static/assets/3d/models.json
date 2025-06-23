@@ -1,47 +1,42 @@
 [
   {
-    "id": "aircraft_kit_1_0",
-    "name": "Aircraft Kit 1 0",
-    "author": "manual",
-    "license": "unknown",
-    "path": "/static/assets/3d/airplanes/aircraft_kit_1_0.glb",
-    "tris": 0,
-    "sha256": "13a3890c4f4b80514cd6172d09d809a2f2c043f82a0c84b5f83b69cbc909059e"
+    "id": "airbus_a380",
+    "name": "Airbus A380",
+    "author": "\"Airbus A380\" (https://skfb.ly/oUTvJ) by KOG_THORNS is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).",
+    "author_url": "",
+    "license": "CC Attribution",
+    "path": "static/assets/3d/airplanes/airbus_a380.glb",
+    "tris": 613083,
+    "sha256": "7fcd1fc4a30f153790ba3ee1059766594806ce44f7d95fd9707adff5088c4ddb"
   },
   {
-    "id": "Airplane",
-    "name": "Airplane",
-    "author": "manual",
-    "license": "unknown",
-    "path": "/static/assets/3d/airplanes/Airplane.glb",
-    "tris": 0,
-    "sha256": "0d72fee0609354170498be59a688e01e1026e88541bf1edbb7623fb6c8b64156"
+    "id": "boeing_787-9_singapore_airlines",
+    "name": "Boeing 787 9 Singapore Airlines",
+    "author": "Unknown Author",
+    "author_url": "",
+    "license": "CC Attribution",
+    "path": "static/assets/3d/airplanes/boeing_787-9_singapore_airlines.glb",
+    "tris": 444420,
+    "sha256": "3172cccc9aa16738f21f45e12dea8e90d3d7511cf97aa03710be60f7254d9b42"
   },
   {
-    "id": "u105mYHLHU",
-    "name": "U105Myhlhu",
-    "author": "manual",
-    "license": "unknown",
-    "path": "/static/assets/3d/airplanes/u105mYHLHU.glb",
-    "tris": 0,
-    "sha256": "58a05015b653fe2912d5648a2bbd23e07ebb82cebd665ae576951d81c08ffcf9"
+    "id": "douglas_dc_3",
+    "name": "Douglas Dc 3",
+    "author": "Unknown Author",
+    "author_url": "",
+    "license": "CC Attribution",
+    "path": "static/assets/3d/airplanes/douglas_dc_3.glb",
+    "tris": 754297,
+    "sha256": "3bd4d114f5ef3797920a1849e3db5948ba31b6e5aa44db57ccc50ad007613f80"
   },
   {
-    "id": "uCeLfsdmNP",
-    "name": "Ucelfsdmnp",
-    "author": "manual",
-    "license": "unknown",
-    "path": "/static/assets/3d/airplanes/uCeLfsdmNP.glb",
-    "tris": 0,
-    "sha256": "aff71d55d7014ccf5709d788aa23255d43dc4bd263c1800e6a8168e1ba1aede0"
-  },
-  {
-    "id": "very_cute_airplane",
-    "name": "Very Cute Airplane",
-    "author": "manual",
-    "license": "unknown",
-    "path": "/static/assets/3d/airplanes/very_cute_airplane.glb",
-    "tris": 0,
-    "sha256": "b77cda3eaa33b934fd8685510b5c4bce44518421f53bd19fb14c5acb32866724"
+    "id": "gulfstream_5_and_a_777",
+    "name": "Gulfstream 5 And A 777",
+    "author": "\"Gulfstream 5 and a 777\" (https://skfb.ly/6Z6SN) by infina is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).",
+    "author_url": "",
+    "license": "CC Attribution",
+    "path": "static/assets/3d/airplanes/gulfstream_5_and_a_777.glb",
+    "tris": 4816,
+    "sha256": "ca673bf9e86aa07bdd2802be1ddf09d17a92ec2bd7c01fb2b12709e179dcc80f"
   }
 ]

@@ -32,41 +32,41 @@
     "tagline": "Colorful streets and historic trams.",
     "fun_fact": "Lisbon is the second-oldest European capital city.",
     "best_time": "April to October.",
-    "images": ["portugal/Portugal1.jpg"]
+    "images": ["portugal/Portugal1.jpg", "portugal/Portugal2.jpg", "portugal/Portugal3.jpg"]
   },
   {
     "name": "Barcelona, Spain",
     "tagline": "Gaudí’s masterpiece city by the sea.",
     "fun_fact": "Sagrada Familia has been under construction since 1882.",
     "best_time": "May–June or September–October.",
-    "images": ["spain/Spain1.jpg"]
+    "images": ["spain/Spain1.jpg", "spain/Spain2.jpg", "spain/Spain3.jpg"]
   },
   {
     "name": "Venice, Italy",
     "tagline": "City of canals and romance.",
     "fun_fact": "Venice has over 400 bridges connecting 118 islands.",
     "best_time": "April–May or September–October.",
-    "images": ["italy/Italy1.jpg"]
+    "images": ["italy/Italy1.jpg","italy/Italy2.jpg","italy/Italy3.jpg"]
   },
   {
     "name": "Amsterdam, Netherlands",
     "tagline": "Bikes, canals, and charming streets.",
     "fun_fact": "There are more bikes than people in Amsterdam.",
     "best_time": "April–May (tulips) or September–November.",
-    "images": ["netherlands/Netherlands1.jpg"]
+    "images": ["netherlands/Netherlands1.jpg", "netherlands/Netherlands2.jpg","netherlands/Netherlands3.jpg"]
   },
   {
     "name": "Singapore",
     "tagline": "A city of the future.",
     "fun_fact": "Singapore is one of only three surviving city-states in the world.",
     "best_time": "February–April.",
-    "images": ["singapore/Singapore1.jpg"]
+    "images": ["singapore/Singapore1.jpg", "singapore/Singapore2.jpg", "singapore/Singapore3.jpg"]
   },
   {
     "name": "Sydney, Australia",
     "tagline": "Harbor city with iconic landmarks.",
     "fun_fact": "The Sydney Opera House roof is made of over one million tiles.",
     "best_time": "September–November or March–May.",
-    "images": ["australia/Australia1.jpg"]
+    "images": ["australia/Australia1.jpg", "australia/Australia2.jpg","australia/Australia3.jpg"]
   }
 ]

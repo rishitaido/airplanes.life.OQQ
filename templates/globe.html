@@ -15,24 +15,40 @@
   </script>
 
   <script type="module" src="{{ url_for('static', filename='maplibre.js') }}"></script>
+  <script type="module" src="{{ url_for('static', filename='globe-tools.js') }}"></script>
 </head>
 
 <body class="page-map">
-  <header class="subheader">
-    <a class="cta-secondary" href="{{ url_for('index') }}">← Back to Home</a>
+
+  <!-- Merged header -->
+  <header class="subheader" style="display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; padding: 0.75rem;">
+    <a class="btn-dark" href="{{ url_for('index') }}">← Back to Home</a>
+    <button id="toggle-view" class="btn-dark">Switch to Flat Map </button>
+    <button id="toggle-airports" class="btn-dark">Hide Airports</button>
+    <button id="toggle-restaurants" class="btn-dark">Show Restaurants </button>
+    <button id="toggle-attractions" class="btn-dark">Show Attractions </button>
+    <input id="globe-search" placeholder="Search IATA / city"
+           style="width: 220px; padding: 0.4rem 0.6rem; border-radius: 6px; border: 1px solid #ccc;" />
   </header>
 
   <!-- Map -->
   <div id="map" style="width: 100%; height: calc(100vh - 80px);"></div>
 
-  <!-- Toolbar -->
-  <div class="ui-bar">
-    <a href="{{ url_for('index') }}" class="btn back">⟵ Home</a>
-    <button id="toggle-view" class="btn">Switch to Flat Map 🗺</button>
-    <button id="toggle-airports" class="btn">Hide Airports</button>
-    <button id="toggle-restaurants" class="btn">Show Restaurants 🍽</button>
-    <button id="toggle-attractions" class="btn">Show Attractions 🎡</button>
-    <input id="globe-search" placeholder="Search IATA / city" />
+  <!-- Sticky Itinerary Sidebar -->
+  <aside id="map-sidebar" class="map-sidebar">
+    <h3>Your Itinerary</h3>
+    <div id="sticky-itinerary"></div>
+  </aside>
+
+  <!-- AI Assistant Button -->
+  <button id="ai-map-chat" class="floating-chat">AI </button>
+
+  <!-- AI Assistant Chat Box -->
+  <div id="map-chat-box" class="chat-box hidden">
+    <textarea id="map-chat-input" placeholder="Ask about an address..."></textarea>
+    <button id="map-chat-send">Send</button>
+    <div id="map-chat-response"></div>
   </div>
+
 </body>
 </html>

@@ -7,7 +7,8 @@ import time
 from limiter_config import limiter
 
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static', static_url_path='/static')
+
 limiter.init_app(app)  # Apply rate limits to this blueprint
 app.register_blueprint(ai_routes)
 

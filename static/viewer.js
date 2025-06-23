@@ -1,12 +1,14 @@
 /*  model-viewer.js – upgraded
  *  ▸ Handles Meshopt *and* Draco / KTX2 compression
  *  ▸ Auto-frames the camera around every new model
- *  ▸ Adds a touch more ambient light so dark PBR assets aren’t black
+ *  ▸ Updates model attribution (license, author)
+ *  ▸ Soft gradient sky background 🎨
  */
+
 import * as THREE                 from "https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.module.js";
 import { GLTFLoader }             from "https://cdn.jsdelivr.net/npm/three@0.152.2/examples/jsm/loaders/GLTFLoader.js";
 import { DRACOLoader }            from "https://cdn.jsdelivr.net/npm/three@0.152.2/examples/jsm/loaders/DRACOLoader.js";
-import { KTX2Loader }            from "https://cdn.jsdelivr.net/npm/three@0.152.2/examples/jsm/loaders/KTX2Loader.js";
+import { KTX2Loader }             from "https://cdn.jsdelivr.net/npm/three@0.152.2/examples/jsm/loaders/KTX2Loader.js";
 import { MeshoptDecoder }         from "https://cdn.jsdelivr.net/npm/three@0.152.2/examples/jsm/libs/meshopt_decoder.module.js";
 import { OrbitControls }          from "https://cdn.jsdelivr.net/npm/three@0.152.2/examples/jsm/controls/OrbitControls.js";
 
@@ -14,7 +16,9 @@ const canvasWrap = document.getElementById("three-canvas-container");
 
 /* ─── scene / camera / renderer ───────────────────────────────── */
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x000000);
+
+// Soft gradient sky using HemisphereLight colors
+scene.background = new THREE.Color(0xbfd9ff);  // top of sky (soft blue)
 
 const camera = new THREE.PerspectiveCamera(
   60,
@@ -33,10 +37,12 @@ const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 
 /* ─── lighting ───────────────────────────────────────────────── */
-scene.add(new THREE.AmbientLight(0xffffff, 0.4));             // new fill
-const hemi = new THREE.HemisphereLight(0xffffff, 0x222222, 1.3);
+scene.add(new THREE.AmbientLight(0xffffff, 0.5)); // soft fill
+
+const hemi = new THREE.HemisphereLight(0xbfd9ff, 0xf0f8ff, 1.5);  // sky color (top), ground color (bottom)
 scene.add(hemi);
-const dir = new THREE.DirectionalLight(0xffffff, 1.5);
+
+const dir = new THREE.DirectionalLight(0xffffff, 1.2);
 dir.position.set(5, 10, 7);
 scene.add(dir);
 
@@ -51,6 +57,8 @@ const ktx2Loader = new KTX2Loader()
     "https://cdn.jsdelivr.net/npm/three@0.152.2/examples/jsm/libs/basis/"
   )
   .detectSupport(renderer);
+
+const creditEl = document.getElementById('model-credit');
 
 /* auto-frame util ------------------------------------------------ */
 function frameObject(obj) {
@@ -69,14 +77,14 @@ function frameObject(obj) {
 }
 
 /* ─── load + display glb --------------------------------------- */
-function loadGLB(url) {
+function loadGLB(model) {
   const loader = new GLTFLoader();
   loader.setMeshoptDecoder(MeshoptDecoder);
   loader.setDRACOLoader(dracoLoader);
   loader.setKTX2Loader(ktx2Loader);
 
   loader.load(
-    url,
+    model.path,
     (gltf) => {
       // remove previous model
       scene.getObjectByName("model")?.removeFromParent();
@@ -86,6 +94,13 @@ function loadGLB(url) {
       scene.add(obj);
 
       frameObject(obj);
+
+      // update credit
+      creditEl.innerHTML =
+        `Model: "${model.name}" by ${model.author} — ` +
+        (model.license === "cc-by"
+          ? 'Licensed under <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank">CC-BY 4.0</a>'
+          : 'Public Domain (CC0)');
     },
     undefined,
     (err) => console.error("GLB load error:", err)
@@ -104,7 +119,10 @@ function createModelPicker(list) {
     sel.appendChild(opt);
   });
 
-  sel.addEventListener("change", (e) => loadGLB(list[e.target.value].path));
+  sel.addEventListener("change", (e) => {
+    const model = list[e.target.value];
+    loadGLB(model);
+  });
 }
 
 /* ─── fetch model list + boot ▲ -------------------------------- */
@@ -114,7 +132,7 @@ fetch("/static/assets/3d/models.json")
     if (!Array.isArray(list) || !list.length)
       throw new Error("models.json is empty");
 
-    loadGLB(list[0].path);
+    loadGLB(list[0]); // load first
     createModelPicker(list);
   })
   .catch((err) => {
@@ -139,4 +157,3 @@ window.addEventListener("resize", () => {
   controls.update();
   renderer.render(scene, camera);
 })();
-

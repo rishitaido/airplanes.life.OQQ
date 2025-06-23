@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>My AI 3-D Viewer</title>
 
+  <base href="/">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
 
   <script type="importmap">
@@ -33,9 +34,9 @@
       <div class="viewer-controls">
         <label for="model-select">Choose a model:</label>
         <select id="model-select"></select>
-
-        <a class="cta-secondary" href="{{ url_for('index') }}">← Back to Chat</a>
       </div>
+
+      <p class="model-credit" id="model-credit"></p>
     </section>
   </main>
 
