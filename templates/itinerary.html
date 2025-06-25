@@ -4,43 +4,65 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Trip Itinerary Viewer</title>
-
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 
 <body class="layout-page">
-  <!-- Full page background image wrapper -->
   <section class="page-bg-itinerary">
-
-    <!-- Header -->
     <header class="subheader">
       <a class="cta-secondary" href="{{ url_for('index') }}">← Back to Home</a>
     </header>
 
-    <!-- Main content -->
     <main class="layout-narrow fade-in">
+      <h1>Trip Itinerary Viewer</h1>
 
-      <h1> Trip Itinerary Viewer</h1>
-
-      <!-- Itinerary Builder Form -->
       <section id="itinerary-builder" class="card">
         <h2>Build your itinerary</h2>
         <form id="itinerary-form">
-          <label>
-            City
+          <label>City
             <input id="city" type="text" name="city" placeholder="e.g. Rome" required />
           </label>
-          <label>
-            Days
+          <label>Days
             <input id="days" type="number" name="days" min="1" max="14" value="3" required />
           </label>
-          <label>
-            Theme
+          <label>Theme
             <select id="theme" name="theme">
               <option>Food & Culture</option>
               <option>Nature & Outdoors</option>
               <option>Museums & History</option>
               <option>Luxury & Relaxation</option>
+            </select>
+          </label>
+          <label>Region Type
+            <select id="region" name="region">
+              <option>Beach / Coastal</option>
+              <option>Snow / Mountains</option>
+              <option>City / Urban</option>
+              <option>Island / Remote</option>
+              <option>Rainforest / Tropical</option>
+            </select>
+          </label>
+          <label>Budget
+            <select id="budget" name="budget">
+              <option>Backpacker ($)</option>
+              <option>Mid-range ($$)</option>
+              <option>Luxury ($$$)</option>
+            </select>
+          </label>
+          <label>Travel Pace
+            <select id="pace" name="pace">
+              <option>Relaxed</option>
+              <option>Balanced</option>
+              <option>Full / Packed</option>
+            </select>
+          </label>
+          <label>Traveler Type
+            <select id="traveler" name="traveler">
+              <option>Solo</option>
+              <option>Couple</option>
+              <option>Family with kids</option>
+              <option>Senior traveler</option>
+              <option>Friend Group</option>
             </select>
           </label>
 
@@ -49,37 +71,38 @@
         </form>
       </section>
 
-      <!-- Itinerary Output -->
       <section id="viewer-output" class="card" style="padding: 1rem;">
-        <!-- Collapsible sections will be injected here -->
       </section>
 
-      <!-- View on Map Button -->
       <div style="text-align: center; margin-top: 1.5rem;">
         <a href="{{ url_for('globe') }}" class="btn-dark">View on Map</a>
       </div>
-
-
     </main>
-
   </section>
 
-  <!-- JS -->
   <script type="module">
     import { renderJSONItinerary } from "{{ url_for('static', filename='itinerary-display.js') }}";
 
     document.getElementById("build-btn").addEventListener("click", async (e) => {
       e.preventDefault();
-      const city  = document.getElementById("city").value.trim();
-      const days  = parseInt(document.getElementById("days").value, 10);
-      const theme = document.getElementById("theme").value;
+
+      const city      = document.getElementById("city").value.trim();
+      const days      = parseInt(document.getElementById("days").value, 10);
+      const theme     = document.getElementById("theme").value;
+      const region    = document.getElementById("region").value;
+      const budget    = document.getElementById("budget").value;
+      const pace      = document.getElementById("pace").value;
+      const traveler  = document.getElementById("traveler").value;
 
       if (!city || !days) {
         alert("Please enter a city and number of days.");
         return;
       }
 
-      const payload = { prompt: { city, days, theme }, days };
+      const payload = {
+        prompt: { city, days, theme, region, budget, pace, traveler },
+        days
+      };
 
       document.getElementById("build-spinner").hidden = false;
 
@@ -89,20 +112,20 @@
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload)
         });
-
         const data = await res.json();
 
         try {
           const parsed = JSON.parse(data.reply);
           renderJSONItinerary(parsed);
           localStorage.setItem("itineraryJSON", JSON.stringify(parsed));
+          localStorage.setItem("itineraryTimestamp", Date.now().toString());
         } catch (err) {
-          console.error("AI reply is not JSON:", err);
+          console.error("AI reply is not valid JSON:", err);
           alert("Error: AI did not return a valid itinerary.");
         }
       } catch (err) {
         console.error("Failed to fetch itinerary:", err);
-        alert("Error contacting the AI.");
+        alert("Error contacting AI.");
       } finally {
         document.getElementById("build-spinner").hidden = true;
       }

@@ -63,24 +63,6 @@ function renderStickyNotes(itinerary) {
   console.log(`✅ Sticky Itinerary Loaded (${itinerary.length} days)`);
 }
 
-function extractPlaceList() {
-  try {
-    const savedJSON = localStorage.getItem("itineraryJSON");
-    if (savedJSON) {
-      const itinerary = JSON.parse(savedJSON);
-      if (Array.isArray(itinerary)) {
-        return itinerary.map(day =>
-          `Day ${day.day}: "${day.morning}", "${day.afternoon}", "${day.evening}"`
-        ).join(" ");
-      }
-    }
-  } catch {
-    // Ignore errors
-  }
-
-  return "";
-}
-
 document.getElementById("ai-map-chat")?.addEventListener("click", () => {
   document.getElementById("map-chat-box")?.classList.toggle("hidden");
 });
@@ -91,15 +73,13 @@ document.getElementById("map-chat-send")?.addEventListener("click", async () => 
 
   document.getElementById("map-chat-response").textContent = "Thinking...";
 
-  const placeList = extractPlaceList();
+  const prompt = `You are an assistant that helps users find addresses or info about trip places. Answer: "${input}"`;
 
   try {
     const res = await fetch("/api/ask", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        prompt: `You are an assistant that helps users find addresses for their trip places. Here is my list of places: ${placeList}. Now answer: "${input}"`
-      })
+      body: JSON.stringify({ prompt })
     });
 
     if (!res.ok) {

@@ -4,30 +4,42 @@
 // Auto-detects JSON vs Text from localStorage
 // ===================================================
 
-export function renderJSONItinerary(itineraryArray, target = "#viewer-output") {
+export function renderJSONItinerary(itineraryInput, target = "#viewer-output") {
   const container =
     typeof target === "string" ? document.querySelector(target) : target;
 
-  if (!container || !Array.isArray(itineraryArray)) return;
+  if (!container || !itineraryInput) return;
+
+  // Support both: array or { days: [...] }
+  let days = [];
+  if (Array.isArray(itineraryInput)) {
+    days = itineraryInput;
+  } else if (Array.isArray(itineraryInput.days)) {
+    days = itineraryInput.days;
+  }
+
+  if (days.length === 0) return;
 
   container.innerHTML = ""; // Clear previous
 
-  itineraryArray.forEach(day => {
+  days.forEach(day => {
     const html = `
       <p><strong>Morning:</strong> ${day.morning}</p>
       <p><strong>Afternoon:</strong> ${day.afternoon}</p>
       <p><strong>Evening:</strong> ${day.evening}</p>
+      ${day.estimated_cost ? `<p><strong>Estimated Cost:</strong> ${day.estimated_cost}</p>` : ""}
     `;
 
     const block = document.createElement("details");
-    block.className = "message ai";
     block.innerHTML = `
-      <summary><strong>Day ${day.day}</strong></summary>
+      <summary>Day ${day.day}</summary>
       <div style="margin-top: .5rem;">${html}</div>
     `;
 
     container.appendChild(block);
   });
+
+  console.log(`✅ Rendered ${days.length} day(s) itinerary`);
 }
 
 export function renderTextItinerary(itineraryText, target = "#viewer-output") {
@@ -45,6 +57,8 @@ export function renderTextItinerary(itineraryText, target = "#viewer-output") {
   block.textContent = itineraryText;
 
   container.appendChild(block);
+
+  console.log("✅ Rendered text itinerary");
 }
 
 // ===================================================
@@ -64,15 +78,11 @@ window.addEventListener("DOMContentLoaded", () => {
     localStorage.removeItem("itineraryTimestamp");
   }
 
-
   if (savedJSON) {
     try {
       const itinerary = JSON.parse(savedJSON);
-      if (Array.isArray(itinerary)) {
-        renderJSONItinerary(itinerary);
-        console.log(`✅ Loaded itineraryJSON — ${itinerary.length} days`);
-        return;
-      }
+      renderJSONItinerary(itinerary);
+      return;
     } catch (err) {
       console.warn("⚠️ Invalid itineraryJSON:", err);
     }
@@ -81,17 +91,13 @@ window.addEventListener("DOMContentLoaded", () => {
   if (savedText) {
     try {
       const maybeArray = JSON.parse(savedText);
-      if (Array.isArray(maybeArray)) {
-        renderJSONItinerary(maybeArray);
-        console.log(`✅ Loaded itineraryText (parsed JSON) — ${maybeArray.length} days`);
-        return;
-      }
+      renderJSONItinerary(maybeArray);
+      return;
     } catch {
       // Not JSON — treat as plain text
     }
 
     renderTextItinerary(savedText);
-    console.log("✅ Loaded itineraryText (plain text)");
     return;
   }
 

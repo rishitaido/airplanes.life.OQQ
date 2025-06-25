@@ -20,13 +20,13 @@
 
 <body class="page-map">
 
-  <!-- Merged header -->
+  <!-- Header -->
   <header class="subheader" style="display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; padding: 0.75rem;">
     <a class="btn-dark" href="{{ url_for('index') }}">← Back to Home</a>
-    <button id="toggle-view" class="btn-dark">Switch to Flat Map </button>
+    <button id="toggle-view" class="btn-dark">Switch to Flat Map</button>
     <button id="toggle-airports" class="btn-dark">Hide Airports</button>
-    <button id="toggle-restaurants" class="btn-dark">Show Restaurants </button>
-    <button id="toggle-attractions" class="btn-dark">Show Attractions </button>
+    <button id="toggle-restaurants" class="btn-dark">Show Restaurants</button>
+    <button id="toggle-attractions" class="btn-dark">Show Attractions</button>
     <input id="globe-search" placeholder="Search IATA / city"
            style="width: 220px; padding: 0.4rem 0.6rem; border-radius: 6px; border: 1px solid #ccc;" />
   </header>
@@ -34,17 +34,23 @@
   <!-- Map -->
   <div id="map" style="width: 100%; height: calc(100vh - 80px);"></div>
 
-  <!-- Sticky Itinerary Sidebar -->
+  <!-- Itinerary Sidebar -->
   <aside id="map-sidebar" class="map-sidebar">
-    <h3>Your Itinerary</h3>
+    <h3 onclick="document.getElementById('map-sidebar').classList.toggle('collapsed')">
+      Your Itinerary <span style="font-size:1rem;">▼</span>
+    </h3>
     <div id="sticky-itinerary"></div>
   </aside>
 
-  <!-- AI Assistant Button -->
-  <button id="ai-map-chat" class="floating-chat">AI </button>
+  <!-- AI Chat Floating Button -->
+  <button id="ai-map-chat" class="floating-chat">💬</button>
 
-  <!-- AI Assistant Chat Box -->
+  <!-- AI Chat Box -->
   <div id="map-chat-box" class="chat-box hidden">
+    <div class="chat-box-header">
+      AI Assistant
+      <button onclick="document.getElementById('map-chat-box').classList.add('hidden')" style="background:none;border:none;font-size:1.2rem;cursor:pointer;">&times;</button>
+    </div>
     <textarea id="map-chat-input" placeholder="Ask about an address..."></textarea>
     <button id="map-chat-send">Send</button>
     <div id="map-chat-response"></div>
