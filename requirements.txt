@@ -33,8 +33,7 @@ matplotlib==3.8.1
 mdurl==0.1.2
 mplfinance==0.12.10b0
 multidict==6.4.3
-numpy==1.21.1
-ordered-set==4.1.0
+numpy>=2.0.0,<3.0.0 
 packaging==23.2
 pandas==2.1.2
 pandas_ta==0.3.14b0
