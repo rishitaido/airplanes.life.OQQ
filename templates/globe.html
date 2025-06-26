@@ -21,7 +21,7 @@
 <body class="page-map">
 
   <!-- Header -->
-  <header class="subheader" style="display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; padding: 0.75rem;">
+  <header class="subheader-map">
     <a class="btn-dark" href="{{ url_for('index') }}">← Back to Home</a>
     <button id="toggle-view" class="btn-dark">Switch to Flat Map</button>
     <button id="toggle-airports" class="btn-dark">Hide Airports</button>
@@ -32,7 +32,7 @@
   </header>
 
   <!-- Map -->
-  <div id="map" style="width: 100%; height: calc(100vh - 80px);"></div>
+  <div id="map"></div>
 
   <!-- Itinerary Sidebar -->
   <aside id="map-sidebar" class="map-sidebar">
