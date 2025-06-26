@@ -1,0 +1,8 @@
+services:
+  - type: web
+    name: airports-ai-oqq          # your Render service name
+    env: python                    # or “python3” if that’s what you named it
+    plan: free                     # or your paid plan
+    pythonVersion: 3.11.4
+    buildCommand: pip install --upgrade pip setuptools wheel && pip install -r requirements.txt
+    startCommand: python app.py
