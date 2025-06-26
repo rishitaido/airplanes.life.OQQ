@@ -25,7 +25,8 @@ def before_request():
 @app.after_request
 def after_request(response):
     REQUEST_COUNT.labels(request.method, request.path).inc()
-    REQUEST_LATENCY.labels(request.path).observe(time.time() - request.start_time)
+    start = getattr(request, "start_time", time.time())
+    REQUEST_LATENCY.labels(request.path).observe(time.time() - start)
     return response
 
 # 3) Expose the /metrics endpoint
@@ -70,5 +71,4 @@ def destinations():
     return render_template("destinations.html")
 
 if __name__ == "__main__":
-    app.run(debug=True)
-
+    app.run(host="0.0.0.0", port=5000, debug=True)
