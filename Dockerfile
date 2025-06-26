@@ -51,8 +51,10 @@ RUN addgroup --system appgroup && \
     adduser --system --ingroup appgroup appuser
 
 # Copy in the installed venv and app code from builder
+
 COPY --from=builder /app/.venv    /app/.venv
 COPY --from=builder /app          /app
+RUN chown -R appuser:appgroup /app
 
 # Use the venv’s python/pip by default
 ENV PATH="/app/.venv/bin:$PATH"
