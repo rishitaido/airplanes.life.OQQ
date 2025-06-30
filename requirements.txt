@@ -8,3 +8,4 @@ python-dotenv==1.1.1
 trimesh==4.6.10               # for your trimesh imports in scripts
 gunicorn>=20.1.0
 requests==2.32.4
+pandas==2.3.0
