@@ -1,6 +1,51 @@
-## Running the Project with Docker
+# OpenQQuantify
 
-This project provides a Docker-based setup for local development and deployment. The Docker configuration is tailored for a Python 3.11 application (using Flask, by default on port 5000) and includes all necessary dependencies and build steps.
+OpenQQuantify is a Python-based application designed for quantitative analysis and data-driven insights. Built with Flask, it provides a robust, reproducible environment for local development and deployment.
+
+## Features
+
+- Modern Python 3.11 application structure
+- Flask web server (default port 5000)
+- Dockerized for easy setup and consistent environments
+- Virtual environment isolation for dependencies
+- Ready for integration with external services (e.g., databases)
+- Secure, minimal Docker image using a non-root user
+
+## Getting Started (Without Docker)
+
+You can run OpenQQuantify locally without Docker by following these steps:
+
+1. **Clone the repository:**
+   ```sh
+   git clone https://github.com/yourusername/OpenQQuantify.git
+   cd OpenQQuantify
+   ```
+
+2. **Create a virtual environment and activate it:**
+   ```sh
+   python3 -m venv .venv
+   source .venv/bin/activate
+   ```
+
+3. **Install dependencies:**
+   ```sh
+   pip install -r requirements.txt
+   ```
+
+4. **Set environment variables (if needed):**
+   - Copy `.env.example` to `.env` and edit as required, or set variables directly in your shell.
+
+5. **Run the application:**
+   ```sh
+   python app.py
+   ```
+   The Flask app will be available at [http://localhost:5000](http://localhost:5000)
+
+---
+
+## Running the Project with Docker (Optional)
+
+If you prefer Docker, you can use the provided Docker setup for local development and deployment. The Docker configuration is tailored for a Python 3.11 application (using Flask, by default on port 5000) and includes all necessary dependencies and build steps.
 
 ### Project-Specific Docker Details
 
